@@ -715,11 +715,30 @@
                     return;
                 }
 
+                let didFinish = false;
+                const timeoutId = setTimeout(() => {
+                    if (didFinish) return;
+                    didFinish = true;
+                    cleanup(script);
+                    reject(new Error('ไม่ได้รับคำตอบจาก Apps Script API ภายในเวลาที่กำหนด กรุณาตรวจว่า Code.gs มี JSONP API Bridge และ Deploy URL เป็น /exec ล่าสุด'));
+                }, 30000);
+
+                const originalCallback = window[callbackName];
+                window[callbackName] = (response) => {
+                    if (didFinish) return;
+                    didFinish = true;
+                    clearTimeout(timeoutId);
+                    originalCallback(response);
+                };
+
                 script.src = requestUrl;
                 script.async = true;
                 script.onerror = () => {
+                    if (didFinish) return;
+                    didFinish = true;
+                    clearTimeout(timeoutId);
                     cleanup(script);
-                    reject(new Error('เชื่อมต่อ Google Apps Script API ไม่สำเร็จ'));
+                    reject(new Error('เชื่อมต่อ Google Apps Script API ไม่สำเร็จ: URL อาจไม่ใช่ /exec, Deployment ยังไม่ได้เป็น Anyone, หรือ Code.gs ยังไม่รองรับ JSONP'));
                 };
                 document.body.appendChild(script);
             });
