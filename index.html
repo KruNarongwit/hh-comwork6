@@ -1,0 +1,2300 @@
+<!-- GitHub Pages API-ready index.html | เปิดจาก GitHub Pages ได้โดยตรง | ใช้คู่กับ Code_GitHubPages_API_Complete.gs -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบสั่งเสื้อคณะสี</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.2/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+
+  <style>
+    :root{
+      --primary:#FFE600;
+      --primary-dark:#111111;
+      --secondary:#111111;
+      --accent:#111111;
+      --magenta:#111111;
+      --soft:#FFFDE6;
+      --text:#111111;
+      --muted:#5F6368;
+      --card:#FFFFFF;
+      --border:rgba(17,17,17,.12);
+      --shadow:0 18px 46px rgba(0,0,0,.10);
+      --shadow-soft:0 8px 24px rgba(0,0,0,.08);
+      --radius:24px;
+    }
+    body.theme-yellow{ --primary:#FFE600; --primary-dark:#111111; --secondary:#111111; --accent:#E60012; --magenta:#FF00A8; --soft:#FFFCE8; --title-gradient:linear-gradient(90deg,#FFE600 0%,#E60012 24%,#111111 50%,#FFE600 76%,#FF00A8 100%); --frame-gradient:linear-gradient(90deg,#FFE600,#E60012,#111111,#FFE600); }
+    body.theme-green{ --primary:#45C95A; --primary-dark:#0D2F16; --secondary:#111111; --accent:#FFE600; --magenta:#159447; --soft:#F1FFF4; --title-gradient:linear-gradient(90deg,#45C95A 0%,#0D2F16 34%,#FFE600 66%,#45C95A 100%); --frame-gradient:linear-gradient(90deg,#45C95A,#0D2F16,#FFE600,#45C95A); }
+    body.theme-red{ --primary:#FF3B30; --primary-dark:#351010; --secondary:#111111; --accent:#FFE600; --magenta:#FF006E; --soft:#FFF3F2; --title-gradient:linear-gradient(90deg,#FF3B30 0%,#351010 34%,#FFE600 66%,#FF006E 100%); --frame-gradient:linear-gradient(90deg,#FF3B30,#351010,#FFE600,#FF006E); }
+    body.theme-purple{ --primary:#8E44FF; --primary-dark:#1D1238; --secondary:#111111; --accent:#FFE600; --magenta:#D500F9; --soft:#F8F1FF; --title-gradient:linear-gradient(90deg,#8E44FF 0%,#1D1238 34%,#FFE600 66%,#D500F9 100%); --frame-gradient:linear-gradient(90deg,#8E44FF,#1D1238,#FFE600,#D500F9); }
+    body.theme-custom{ --primary:var(--custom-primary,#FFE600); --primary-dark:var(--custom-secondary,#111111); --secondary:var(--custom-secondary,#111111); --accent:var(--custom-primary,#FFE600); --magenta:var(--custom-primary,#FFE600); --soft:#FFFFFF; --title-gradient:linear-gradient(90deg,var(--custom-primary,#FFE600),var(--custom-secondary,#111111),var(--custom-primary,#FFE600)); --frame-gradient:linear-gradient(90deg,var(--custom-primary,#FFE600),var(--custom-secondary,#111111),var(--custom-primary,#FFE600)); }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body,.swal2-popup,button,input,select,textarea,.table{font-family:'Kanit',sans-serif!important}
+    body{
+      min-height:100vh; margin:0; color:var(--text); font-weight:400; line-height:1.65;
+      background:
+        radial-gradient(circle at 8% 6%, rgba(255,212,0,.28), transparent 26%),
+        radial-gradient(circle at 92% 4%, rgba(233,30,99,.12), transparent 24%),
+        radial-gradient(circle at 88% 88%, rgba(229,57,53,.10), transparent 28%),
+        #FFFDE6;
+      display:flex; flex-direction:column;
+    }
+    .app-container{width:min(calc(100% - 1rem),1080px); margin-inline:auto;}
+
+    .brand-hero{
+      border-radius:24px; padding:clamp(.68rem,1.55vw,1rem); overflow:hidden; position:relative;
+      background:#FFFFFF;
+      border:1px solid rgba(17,17,17,.10); box-shadow:var(--shadow);
+    }
+    .brand-hero:before{content:""; position:absolute; inset:0; pointer-events:none; background:none;}
+    .brand-hero-main{position:relative; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:clamp(.55rem,1.5vw,.9rem);}
+    .brand-logo-wrap{width:clamp(54px,5.8vw,72px); height:clamp(54px,5.8vw,72px); border-radius:20px; padding:4px; background:var(--primary); box-shadow:0 10px 26px rgba(0,0,0,.16); animation:logoSlowBounce 4.4s ease-in-out infinite; flex:none;}
+    .site-logo{display:block; width:100%; height:100%; object-fit:cover; border-radius:16px; background:#fff;}
+    @keyframes logoSlowBounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.028)}}
+    .brand-copy{min-width:0; padding-block:.06rem;}
+    .header-title-text{
+      margin:0; font-size:clamp(1.55rem,3.55vw,2.75rem); line-height:1.34; font-weight:800; letter-spacing:-.012em;
+      background:linear-gradient(90deg,#FFE600 0%,#E60012 18%,#111111 36%,#FF00A8 54%,#111111 72%,#FFE600 100%);
+      background-size:240% auto; -webkit-background-clip:text; background-clip:text; color:transparent;
+      text-shadow:0 1px 0 rgba(255,255,255,.55); animation:titleGradient 7s linear infinite;
+      padding:.08em 0 .1em;
+    }
+    @keyframes titleGradient{to{background-position:240% center}}
+    .brand-subtitle{margin-top:.05rem; color:#372400; font-size:clamp(.86rem,1.6vw,1.02rem); font-weight:600; line-height:1.48;}
+    .footer-dot{opacity:.55; padding-inline:.35rem;}
+    .mobile-menu-toggle{justify-self:end; white-space:nowrap; padding:.55rem .85rem!important;}
+    .menu-card{position:relative; margin-top:.7rem;}
+    .menu-tabs{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.5rem; border:0; padding:0;}
+    .menu-tabs .nav-item{width:100%;}
+    .menu-tabs .nav-link{width:100%; min-height:43px; border:1px solid rgba(17,17,17,.12); border-radius:16px; color:#111; background:rgba(255,255,255,.76); font-weight:700; box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 6px 14px rgba(0,0,0,.08);}
+    .menu-tabs .nav-link.active,.menu-tabs .nav-link:hover{color:#111; background:var(--primary); border-color:rgba(233,30,99,.24); transform:translateY(-1px);}
+    .nav-link i,.btn i,.form-label i,.section-header-text i,.sub-header-text i{margin-right:.3rem; vertical-align:-2px;}
+
+    .custom-card,.admin-shell,.summary-card,.model-card,.summary-detail-card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-soft); overflow:hidden;}
+    .custom-card:before,.summary-card:before,.model-card:before,.summary-detail-card:before{content:""; display:block; height:4px; background:var(--primary);}
+    .card-body{position:relative;}
+    .section-header-text,.sub-header-text{color:#111!important; font-weight:800; line-height:1.38;}
+    .text-muted{color:var(--muted)!important}
+    .main-color-text{color:#111}
+
+    .btn-submit-custom,.btn-theme,.btn-3d{border:0; border-radius:15px; color:#111!important; font-weight:800; background:var(--primary); box-shadow:0 6px 0 #111111,0 12px 24px rgba(0,0,0,.14); transition:.18s ease;}
+    .btn-submit-custom:hover,.btn-theme:hover,.btn-3d:hover{transform:translateY(-2px); filter:saturate(1.05) brightness(1.02);}
+    .btn-submit-custom:active,.btn-theme:active,.btn-3d:active{transform:translateY(3px); box-shadow:0 3px 0 #111111,0 8px 16px rgba(140,90,0,.12);}
+    .btn-outline-theme{border:1px solid rgba(140,90,0,.24); color:#111!important; background:#fffdf0; border-radius:15px; font-weight:700;}
+    .btn-outline-theme:hover{background:var(--primary); color:#111!important;}
+    .btn-eye{border-color:var(--border); background:#fff; color:#111; border-radius:0 14px 14px 0;}
+    .form-label{font-weight:700; color:#111;}
+    .form-control,.form-select{border-radius:15px; border:1px solid var(--border); padding:.72rem .9rem; color:#111!important; background:#fff;}
+    .form-control:focus,.form-select:focus{border-color:var(--secondary); box-shadow:0 0 0 .24rem rgba(255,212,0,.22);}
+    .form-text{color:#667085;}
+
+    .order-main-flow{display:grid; grid-template-columns:1fr; gap:1.05rem; align-items:start;}
+    .featured-model-shell{max-width:900px; margin-inline:auto; width:100%; background:#FFFFFF!important; border:1px solid rgba(212,175,55,.34)!important; box-shadow:0 20px 52px rgba(0,0,0,.14)!important;}
+    .featured-model-shell .card-body{padding:clamp(.7rem,1.8vw,1.1rem)!important;}
+    .shirt-showcase-title,.shirt-display-spacer{display:none!important;}
+    #featuredModels{display:flex; justify-content:center; align-items:center; margin:0;}
+    #featuredModels>.col-12,#featuredModels>[class*="col-"]{width:100%!important; max-width:850px; padding:0!important; margin-inline:auto;}
+    .public-shirt-card{display:grid; place-items:center; width:100%; min-height:clamp(330px,52vw,620px); padding:clamp(.5rem,1.6vw,1rem)!important; border-radius:28px!important; border:4px solid transparent!important; background:#FFFFFF!important; box-shadow:0 22px 58px rgba(0,0,0,.12)!important; cursor:zoom-in;}
+    .public-shirt-card img,#featuredModels .model-card img{display:block; width:100%!important; height:clamp(360px,58vh,640px)!important; object-fit:contain!important; border-radius:21px!important; background:#FFFFFF!important; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)!important; padding:clamp(.2rem,.8vw,.65rem)!important;}
+    .model-card-button{border:0;}
+    .model-card:hover{transform:translateY(-2px);}
+    .model-image-button{display:block; width:100%; padding:0; border:0; background:transparent; cursor:zoom-in;}
+    .model-card .model-image-button img{width:100%; height:260px; object-fit:contain; background:#fff; padding:.5rem;}
+    .model-upload-preview{width:100%; max-height:320px; object-fit:contain; border-radius:20px; background:#fff; border:1px solid var(--border);}
+    .order-form-card{max-width:720px; margin-inline:auto; width:100%;}
+
+    .style-choice-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem;}
+    .style-choice{display:flex; align-items:center; justify-content:center; gap:.55rem; padding:.8rem; border:1px solid var(--border); border-radius:17px; background:#fffdf1; font-weight:800; cursor:pointer;}
+    .style-choice input{margin:0;}
+    .teacher-picker-wrap{position:relative;}
+    .teacher-picker-panel{display:none; position:absolute; z-index:1055; left:0; right:0; top:calc(100% + .35rem); max-height:310px; overflow:auto; background:#fff; border:1px solid rgba(140,90,0,.18); border-radius:18px; box-shadow:0 20px 42px rgba(52,35,0,.16); padding:.38rem;}
+    .teacher-picker-panel.is-open,.teacher-picker-panel.show{display:block;}
+    .teacher-picker-grid{display:grid; gap:.28rem;}
+    .teacher-picker-item{width:100%; text-align:left; border:0; background:#fff; color:#111; padding:.72rem .82rem; border-radius:14px; font-weight:600; display:flex; gap:.7rem; align-items:center;}
+    .teacher-picker-item:hover{background:#fff4bd;}
+    .teacher-no{display:inline-grid; place-items:center; min-width:28px; height:28px; border-radius:999px; background:var(--primary); font-size:.82rem; font-weight:800;}
+    .teacher-picker-empty{padding:.85rem; color:var(--muted); font-weight:600;}
+
+    .table-responsive{border:1px solid var(--border); border-radius:20px; background:#fff; overflow:auto; box-shadow:var(--shadow-soft);}
+    .custom-table{margin:0; vertical-align:middle; color:#111!important;}
+    .custom-table th,.custom-table td{white-space:nowrap; color:#111!important; padding:.76rem .86rem;}
+    .table-header-custom th{background:var(--primary)!important; color:#111!important; font-weight:800; border:0;}
+    .actions-column{width:150px;}
+    .teacher-admin-table{min-width:560px;}
+    .teacher-admin-table td,.teacher-admin-table th{vertical-align:middle;}
+    .teacher-row-selected{background:#fff6cc!important;}
+
+    .summary-luxury-head{display:flex; align-items:center; gap:.85rem; padding:.92rem; border-radius:22px; background:#FFFFFF; color:#111; border:1px solid var(--border); box-shadow:var(--shadow-soft);}
+    .summary-luxury-head .section-header-text{color:#111!important; margin:0;}
+    .summary-luxury-head p{color:#4b5563!important;}
+    .summary-luxury-icon,.summary-card .icon,.summary-detail-head span{width:52px; height:52px; border-radius:17px; display:grid; place-items:center; flex:none; background:var(--primary); color:#111; font-size:1.28rem; box-shadow:0 10px 22px rgba(0,0,0,.12);}
+    .summary-luxury-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.95rem;}
+    .summary-card{padding:.95rem; min-height:144px; background:#FFFFFF;}
+    .summary-card .icon{margin-bottom:.7rem;}
+    .stat-label{font-weight:800; color:#111;}
+    .stat-value{font-size:clamp(1.9rem,4.2vw,3rem); font-weight:800; color:#111; line-height:1;}
+    .stat-note{color:var(--muted); font-weight:600;}
+    .summary-detail-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.95rem;}
+    .summary-detail-card{padding:.95rem; background:#FFFFFF;}
+    .summary-detail-head{display:flex; align-items:center; gap:.75rem; margin-bottom:.8rem;}
+    .summary-detail-head h5{margin:0; color:#111; font-weight:800;}
+    .summary-detail-head p{margin:0; color:var(--muted); font-size:.9rem;}
+    .summary-pill-list{display:grid; gap:.5rem;}
+    .summary-pill,.summary-pill-row{display:flex; justify-content:space-between; align-items:center; gap:.75rem; padding:.62rem .78rem; border-radius:999px; background:#fff; border:1px solid rgba(0,0,0,.10); color:#111; font-weight:700;}
+    .summary-empty-mini{padding:.75rem; border-radius:16px; background:#fff; color:var(--muted);}
+
+    .admin-shell{padding:clamp(.75rem,2vw,1.15rem);}
+    .admin-tabs{border:0; gap:.5rem;}
+    .admin-tabs .nav-link{border:1px solid var(--border); border-radius:999px; color:#111; background:#fffdf0; font-weight:800;}
+    .admin-tabs .nav-link.active{background:var(--primary); color:#111;}
+
+    .admin-password-note{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem;padding:.72rem .85rem;border:1px dashed rgba(17,17,17,.28);border-radius:16px;background:#fffde8;color:#111;font-weight:500;line-height:1.45}
+    .admin-password-note i{color:#111}.admin-password-note span{font-size:.88rem;color:#3b3b3b}
+    .permission-card{padding:.8rem .9rem;border:1px solid rgba(17,17,17,.13);border-radius:18px;background:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
+    .permission-card .form-check{display:flex;align-items:flex-start;gap:.7rem;margin:0}.permission-card .form-check-input{margin-top:.2rem;min-width:2.4em}.permission-card small{display:block;color:#555;font-weight:400;line-height:1.42;margin-top:.2rem}
+    .theme-option{height:100%; cursor:pointer; border:2px solid transparent; border-radius:18px; padding:.75rem; background:#fff; box-shadow:0 8px 20px rgba(52,35,0,.07);}
+    .theme-option.active{border-color:var(--magenta); box-shadow:0 14px 30px rgba(233,30,99,.14);}
+    .theme-option strong{display:block; color:#111; font-weight:800;}
+    .theme-swatch{height:44px; border-radius:15px; margin-bottom:.5rem; border:1px solid rgba(0,0,0,.10);}
+    .swatch-yellow{background:linear-gradient(135deg,#FFE600 0 50%,#111111 50% 100%)!important;}
+    .swatch-green{background:linear-gradient(135deg,#45C95A 0 50%,#0D2F16 50% 100%)!important;}
+    .swatch-red{background:linear-gradient(135deg,#FF3B30 0 50%,#351010 50% 100%)!important;}
+    .swatch-purple{background:linear-gradient(135deg,#8E44FF 0 50%,#1D1238 50% 100%)!important;}
+    .swatch-custom,.custom-color-bar{background:linear-gradient(135deg,var(--custom-primary,#FFE600),var(--custom-secondary,#111111));}
+    .custom-color-bar{height:44px; border-radius:15px; border:1px solid var(--border);}
+    .logo-preview-wrap{position:relative; display:inline-block;}
+    .logo-preview{width:96px; height:96px; object-fit:cover; border-radius:22px; border:3px solid var(--primary); background:#fff;}
+    .remove-logo-btn{position:absolute; top:-10px; right:-10px; width:32px; height:32px; border-radius:999px; border:0; display:grid; place-items:center; color:#fff; background:var(--accent); box-shadow:var(--shadow-soft);}
+    .empty-state{width:100%; border:1px dashed rgba(140,90,0,.22); border-radius:20px; padding:2rem; text-align:center; color:#5b6472; background:#fffdf2;}
+    .footer-custom{margin-top:auto; background:#fff; color:#111; border-top:1px solid rgba(140,90,0,.12); box-shadow:0 -8px 24px rgba(52,35,0,.05); font-weight:700;}
+    .footer-inner{width:min(calc(100% - 1rem),1080px); margin-inline:auto; padding:.85rem .2rem; text-align:center;}
+    .image-preview-popup{border-radius:28px!important; overflow:hidden;}
+    .image-preview-popup img{border-radius:20px;}
+    .badge-soft-success{color:#067647; background:#dcfae6;}
+    .badge-soft-danger{color:#b42318; background:#fee4e2;}
+    .order-chip{display:inline-flex; align-items:center; gap:.25rem; padding:.32rem .55rem; margin:.12rem; border-radius:999px; background:#fff7cf; border:1px solid rgba(140,90,0,.12); color:#111;}
+
+    @media (max-width:991.98px){
+      .brand-hero-main{grid-template-columns:auto minmax(0,1fr) auto;}
+      .menu-tabs{grid-template-columns:repeat(2,minmax(0,1fr));}
+      .summary-luxury-grid,.summary-detail-grid{grid-template-columns:1fr;}
+      .custom-table th,.custom-table td{font-size:.94rem;}
+    }
+    @media (max-width:575.98px){
+      .app-container{width:min(calc(100% - .65rem),1080px); margin-top:.55rem!important;}
+      .brand-hero{border-radius:22px; padding:.68rem;}
+      .brand-hero-main{grid-template-columns:auto minmax(0,1fr); gap:.55rem;}
+      .mobile-menu-toggle{grid-column:1/-1; width:100%;}
+      .brand-logo-wrap{width:52px; height:52px; border-radius:16px; padding:3px;}
+      .site-logo{border-radius:13px;}
+      .header-title-text{font-size:clamp(1.38rem,7.2vw,2rem); line-height:1.36;}
+      .brand-subtitle{font-size:.88rem;}
+      .menu-tabs{grid-template-columns:1fr; gap:.42rem;}
+      .public-shirt-card{min-height:clamp(300px,96vw,500px); border-radius:23px!important; padding:.5rem!important;}
+      .public-shirt-card img,#featuredModels .model-card img{height:clamp(300px,96vw,500px)!important; border-radius:17px!important;}
+      .style-choice-grid{grid-template-columns:1fr;}
+      .card-body{padding:1rem!important;}
+      .summary-luxury-head{align-items:flex-start;}
+    }
+    @media print{.no-print,.actions-column,.public-actions,.admin-shell,.brand-hero,.footer-custom{display:none!important}.app-container{width:100%;max-width:none}.custom-card,.table-responsive{box-shadow:none;border:1px solid #ddd}}
+
+    /* Version ImageFit Compact Summary ThemeFast: clean overrides */
+    body{background:var(--soft)!important;color:#111!important;font-weight:300!important;}
+    p,li,td,input,select,textarea,.form-control,.form-select,.text-muted,.form-text,.orders-panel-sub,.teacher-picker-item,.summary-pill,.summary-pill-row,.summary-person-row small,.grouped-order-detail-time{font-weight:400!important;}
+    .form-label,.style-choice,.teacher-name-cell,.grouped-order-name{font-weight:500!important;}
+    .section-header-text,.sub-header-text,.orders-panel-title,.stat-label,.summary-detail-head h5{font-weight:700!important;}
+    .btn:not(.btn-close):not(.btn-eye){border-radius:14px!important;font-weight:600!important;box-shadow:0 5px 0 #111,0 12px 18px rgba(0,0,0,.12)!important;transform:translateY(0);transition:.16s ease!important;}
+    .btn:not(.btn-close):not(.btn-eye):hover{transform:translateY(-2px)!important;filter:brightness(1.04)!important;}
+    .btn:not(.btn-close):not(.btn-eye):active{transform:translateY(3px)!important;box-shadow:0 2px 0 #111,0 6px 12px rgba(0,0,0,.10)!important;}
+
+    .brand-hero,.custom-card,.admin-shell,.summary-card,.model-card,.summary-detail-card,.orders-panel{background:#fff!important;border:1px solid rgba(17,17,17,.12)!important;box-shadow:0 10px 26px rgba(0,0,0,.075)!important;}
+    .brand-hero{width:100%!important;padding:clamp(.62rem,1.15vw,.88rem)!important;border:2px solid transparent!important;background:linear-gradient(#fff,#fff) padding-box,var(--frame-gradient) border-box!important;background-size:240% auto!important;animation:cardBorderRun 8.5s linear infinite!important;}
+    .brand-logo-wrap{width:clamp(48px,4.8vw,62px)!important;height:clamp(48px,4.8vw,62px)!important;background:var(--primary)!important;border:2px solid #111;box-shadow:0 7px 0 rgba(17,17,17,.20),0 16px 24px rgba(0,0,0,.10)!important;}
+    .header-title-text{font-size:clamp(1.28rem,3.15vw,2.25rem)!important;line-height:1.38!important;font-weight:700!important;background:var(--title-gradient)!important;background-size:320% auto!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;text-shadow:none!important;animation:titleGradient 6.5s linear infinite!important;padding:.08em 0 .12em!important;}
+    @keyframes titleGradient{to{background-position:320% center}}
+    @keyframes cardBorderRun{to{background-position:240% center}}
+    .brand-subtitle{font-weight:400!important;color:#111!important;font-size:clamp(.82rem,1.35vw,.95rem)!important;}
+    .mobile-menu-toggle{min-width:46px;display:inline-grid;place-items:center;}
+    .menu-tabs .nav-link{font-weight:600!important;min-height:39px!important;border:2px solid #111!important;background:#fff!important;}
+    .menu-tabs .nav-link.active,.menu-tabs .nav-link:hover,.btn-submit-custom,.btn-theme,.btn-3d{background:var(--primary)!important;color:#111!important;border:2px solid #111!important;}
+    .btn-outline-theme{background:#fff!important;border:2px solid #111!important;color:#111!important;}
+    .btn-outline-theme:hover{background:var(--primary)!important;color:#111!important;}
+
+    .custom-card,.orders-panel,.summary-card,.summary-detail-card,.featured-model-shell,.order-form-card,.admin-shell{border:2px solid transparent!important;background:linear-gradient(#fff,#fff) padding-box,var(--frame-gradient) border-box!important;background-size:240% auto!important;animation:cardBorderRun 8.5s linear infinite!important;}
+    .custom-card:before,.summary-card:before,.model-card:before,.summary-detail-card:before{display:none!important;}
+    .card-body{background:#fff;border-radius:calc(var(--radius) - 6px);}
+    .order-main-flow{gap:.85rem!important;}
+    .featured-model-shell{max-width:720px!important;margin-inline:auto!important;}
+    .featured-model-shell .card-body{padding:.58rem!important;}
+    #featuredModels{display:flex;justify-content:center;align-items:center;margin:0!important;}
+    #featuredModels>.col-12,#featuredModels>[class*="col-"]{width:100%!important;max-width:690px!important;padding:0!important;margin-inline:auto!important;}
+    .public-shirt-card{min-height:0!important;height:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:clamp(.4rem,1vw,.75rem)!important;border:0!important;background:#fff!important;box-shadow:none!important;cursor:zoom-in!important;}
+    .public-shirt-card img,#featuredModels .model-card img{display:block!important;width:auto!important;max-width:100%!important;height:auto!important;max-height:clamp(250px,43vh,440px)!important;object-fit:contain!important;border-radius:20px!important;background:#fff!important;box-shadow:0 8px 20px rgba(0,0,0,.07)!important;padding:.28rem!important;border:1px solid rgba(17,17,17,.08)!important;}
+    .model-card .model-image-button img{height:220px!important;object-fit:contain!important;}
+    .model-upload-preview{max-height:260px!important;object-fit:contain!important;}
+    .order-form-card{max-width:720px!important;margin-inline:auto!important;}
+
+    .summary-luxury-head{padding:.72rem .88rem!important;border:2px solid transparent!important;background:linear-gradient(#fff,#fff) padding-box,var(--frame-gradient) border-box!important;background-size:240% auto!important;animation:cardBorderRun 8.5s linear infinite!important;}
+    .summary-luxury-icon,.summary-card .icon,.summary-detail-head span{width:38px!important;height:38px!important;border-radius:13px!important;font-size:1rem!important;background:var(--primary)!important;color:#111!important;border:2px solid #111!important;box-shadow:0 4px 0 rgba(17,17,17,.18),0 10px 16px rgba(0,0,0,.06)!important;}
+    .summary-luxury-head p{font-size:.84rem!important;margin:0!important;}
+    .summary-luxury-grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))!important;gap:.65rem!important;margin-bottom:.8rem!important;}
+    .summary-card{min-height:0!important;padding:.72rem!important;border-radius:20px!important;}
+    .summary-card .icon{margin-bottom:.42rem!important;}
+    .stat-label{font-size:.86rem!important;line-height:1.25!important;}
+    .stat-value{font-size:clamp(1.45rem,3vw,2.15rem)!important;font-weight:700!important;line-height:1.05!important;margin-top:.1rem!important;}
+    .stat-note{font-size:.78rem!important;}
+    .summary-detail-grid{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))!important;gap:.72rem!important;}
+    .person-summary-card{grid-column:1 / -1!important;}
+    .summary-detail-card{padding:.75rem!important;border-radius:20px!important;}
+    .summary-detail-head{display:flex!important;align-items:center!important;gap:.55rem!important;padding:.08rem .1rem .55rem!important;margin:0 0 .55rem!important;border-bottom:1px dashed rgba(17,17,17,.16)!important;}
+    .summary-detail-head h5{font-size:.96rem!important;line-height:1.25!important;}
+    .summary-detail-head p{font-size:.76rem!important;margin:0!important;}
+    .summary-pill-list{display:grid!important;gap:.38rem!important;padding:.05rem!important;}
+    .summary-pill-row,.summary-person-row,.grouped-order-detail{border:1px solid rgba(17,17,17,.12)!important;background:#fffef3!important;color:#111!important;box-shadow:0 4px 12px rgba(0,0,0,.035)!important;}
+    .summary-pill-row,.summary-person-row{padding:.50rem .62rem!important;border-radius:15px!important;}
+    .summary-person-row{display:grid!important;grid-template-columns:1fr auto!important;gap:.6rem!important;align-items:start!important;}
+    .summary-person-row strong{font-weight:600!important;}
+    .summary-person-details{display:grid;gap:.28rem;margin-top:.35rem;}
+    .summary-person-detail{display:flex;align-items:center;justify-content:space-between;gap:.55rem;padding:.36rem .5rem;border-radius:12px;background:#fff;border:1px dashed rgba(17,17,17,.14);font-size:.82rem;}
+
+    .table-responsive{padding:.16rem .24rem .28rem!important;border-radius:16px!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch;}
+    .custom-table{width:100%!important;max-width:100%!important;margin:0!important;border-collapse:separate!important;border-spacing:0 .12rem!important;table-layout:auto!important;font-size:clamp(.73rem,.7vw,.82rem)!important;}
+    .table-header-custom th{background:var(--primary)!important;color:#111!important;border-bottom:2px solid #111!important;font-weight:600!important;}
+    .custom-table th,.custom-table td{padding:.25rem .34rem!important;line-height:1.14!important;white-space:normal!important;vertical-align:middle!important;}
+    .custom-table th{font-size:.73rem!important;}
+    .custom-table td:first-child,.custom-table th:first-child{width:1%!important;min-width:32px!important;text-align:center!important;}
+    .custom-table tr td:first-child{border-radius:10px 0 0 10px;}
+    .custom-table tr td:last-child{border-radius:0 10px 10px 0;}
+    .custom-table .btn,.teacher-action-buttons .btn,.grouped-order-actions .btn{padding:.16rem .34rem!important;font-size:.72rem!important;min-height:26px!important;line-height:1.05!important;}
+    .orders-panel-head{padding:.68rem .82rem .08rem!important;}
+    .orders-panel-title{font-weight:700!important;color:#111!important;}
+    .orders-panel-sub{font-size:.78rem!important;}
+    .grouped-order-name{font-size:.86rem!important;}
+    .grouped-order-details{min-width:0!important;gap:.16rem!important;}
+    .grouped-order-detail{grid-template-columns:minmax(0,1fr) auto!important;gap:.32rem!important;padding:.26rem .36rem!important;border-radius:10px!important;}
+    .grouped-order-detail-main{gap:.10rem .28rem!important;font-size:.74rem!important;}
+    .grouped-order-detail-main span{display:inline-flex;align-items:center;gap:.18rem;}
+    .grouped-order-detail-time{font-size:.64rem!important;}
+    .group-total-badge{display:inline-flex;align-items:center;gap:.22rem;padding:.18rem .36rem!important;border-radius:999px;background:var(--primary);color:#111;border:1.5px solid #111;font-weight:700!important;white-space:nowrap;font-size:.74rem!important;}
+    .grouped-order-action-list{min-width:0!important;gap:.16rem!important;}
+    .grouped-order-action-row{display:flex;align-items:center;justify-content:space-between;gap:.28rem;padding:.22rem .3rem!important;border-radius:10px!important;background:#fffef3;border:1px solid rgba(17,17,17,.12);}
+    .grouped-order-action-row .action-label{font-weight:500!important;color:#111;font-size:.66rem!important;}
+    .order-chip{display:inline-flex;align-items:center;gap:.18rem;margin:.08rem .12rem .08rem 0;padding:.17rem .34rem!important;border-radius:999px;background:#fff7cf;border:1px solid rgba(17,17,17,.12);font-size:.72rem!important;}
+    .teacher-admin-table th:nth-child(1),.teacher-admin-table td:nth-child(1){width:34px!important;min-width:34px!important;}
+    .teacher-admin-table th:nth-child(2),.teacher-admin-table td:nth-child(2){width:48px!important;min-width:48px!important;}
+
+    @media (max-width:991.98px){
+      .summary-luxury-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+      .summary-detail-grid{grid-template-columns:1fr!important;}
+    }
+    @media (max-width:767.98px){
+      .app-container{width:min(calc(100% - .55rem),1080px)!important;padding-left:.24rem!important;padding-right:.24rem!important;}
+      .brand-hero{border-radius:19px!important;padding:.58rem!important;}
+      .brand-hero-main{grid-template-columns:auto minmax(0,1fr);gap:.5rem;}
+      .mobile-menu-toggle{grid-column:1/-1;width:100%;min-height:38px!important;}
+      .brand-logo-wrap{width:46px!important;height:46px!important;border-radius:15px!important;padding:3px!important;}
+      .site-logo{border-radius:12px!important;}
+      .header-title-text{font-size:clamp(1.18rem,6.6vw,1.72rem)!important;line-height:1.42!important;}
+      .brand-subtitle{font-size:.78rem!important;line-height:1.35!important;}
+      .menu-tabs{grid-template-columns:1fr!important;gap:.35rem!important;}
+      .featured-model-shell .card-body{padding:.42rem!important;}
+      .public-shirt-card{padding:.34rem!important;border-radius:18px!important;}
+      .public-shirt-card img,#featuredModels .model-card img{max-height:min(360px,78vw)!important;border-radius:15px!important;}
+      .order-form-card .card-body{padding:.85rem!important;}
+      .summary-luxury-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:.42rem!important;}
+      .summary-card{padding:.52rem!important;border-radius:16px!important;text-align:center!important;}
+      .summary-card .icon{margin-inline:auto!important;margin-bottom:.32rem!important;width:32px!important;height:32px!important;font-size:.85rem!important;}
+      .stat-label{font-size:.70rem!important;}
+      .stat-value{font-size:1.28rem!important;}
+      .stat-note{font-size:.66rem!important;}
+      .summary-luxury-head{padding:.62rem!important;align-items:flex-start!important;}
+      .summary-detail-card{padding:.62rem!important;border-radius:17px!important;}
+      .summary-person-row{grid-template-columns:1fr!important;}
+      .summary-person-detail{display:grid;grid-template-columns:1fr auto;font-size:.78rem;}
+      .card-body{padding:.68rem!important;}
+      .table-responsive{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;}
+      .custom-table,.custom-table tbody,.custom-table tr,.custom-table td{display:block!important;width:100%!important;}
+      .custom-table thead{display:none!important;}
+      .custom-table{border-spacing:0!important;font-size:.80rem!important;}
+      .custom-table tr{margin:0 0 .38rem!important;padding:.42rem .50rem!important;border:2px solid transparent!important;border-radius:14px!important;background:linear-gradient(#fff,#fff) padding-box,var(--frame-gradient) border-box!important;box-shadow:0 6px 16px rgba(0,0,0,.045)!important;}
+      .custom-table td{border:0!important;border-radius:0!important;background:transparent!important;padding:.16rem 0!important;text-align:left!important;line-height:1.18!important;}
+      .custom-table td[data-label]{display:grid!important;grid-template-columns:minmax(62px,27%) minmax(0,1fr)!important;gap:.32rem!important;align-items:start!important;}
+      .custom-table td[data-label]::before{content:attr(data-label);color:#575757;font-weight:600;font-size:.68rem;line-height:1.25;}
+      .custom-table td[data-label="รายละเอียด"]{display:block!important;}
+      .custom-table td[data-label="รายละเอียด"]::before{display:block;margin-bottom:.28rem;}
+      .grouped-order-detail{display:block!important;padding:.30rem .36rem!important;margin-bottom:.20rem!important;}
+      .grouped-order-detail-main{display:flex!important;flex-wrap:wrap!important;gap:.12rem .28rem!important;font-size:.73rem!important;}
+      .grouped-order-action-row{display:grid!important;grid-template-columns:1fr auto!important;padding:.24rem .32rem!important;}
+      .group-total-badge{min-width:0!important;}
+      .teacher-action-buttons,.grouped-order-actions{justify-content:flex-start!important;}
+    }
+    @media print{.no-print,.actions-column,.public-actions,.admin-shell,.brand-hero,.footer-custom{display:none!important}.app-container{width:100%;max-width:none}.custom-card,.table-responsive{box-shadow:none!important;border:1px solid #ddd!important}}
+  
+    .order-person-row-selected td{background:#fffceb!important;}
+    .order-admin-table th,.order-admin-table td{padding-left:.45rem!important;padding-right:.45rem!important;}
+    @media (max-width: 768px){.order-admin-table .grouped-order-details{gap:.3rem}.order-admin-table .grouped-order-detail{padding:.45rem .5rem}.order-admin-table .grouped-order-action-row{padding:.35rem .45rem}}
+
+
+    /* Dashboard chart cards: lightweight CSS charts, no external chart library */
+    .summary-chart-list{display:grid;gap:.55rem;padding:.12rem .08rem .02rem;}
+    .summary-chart-row{display:grid;grid-template-columns:minmax(80px,120px) 1fr auto;gap:.55rem;align-items:center;padding:.54rem .62rem;border-radius:16px;background:#fffdf1;border:1px solid rgba(17,17,17,.10);box-shadow:0 4px 12px rgba(0,0,0,.035);color:#111;}
+    .summary-chart-label{display:flex;align-items:center;gap:.42rem;min-width:0;font-size:.88rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111;}
+    .summary-chart-track{height:12px;border-radius:999px;background:#f1f1f1;border:1px solid rgba(17,17,17,.08);overflow:hidden;}
+    .summary-chart-bar{height:100%;min-width:7px;border-radius:999px;background:#111;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);}
+    .summary-chart-value{font-size:.86rem;font-weight:600;white-space:nowrap;color:#111;}
+    .summary-chart-note{font-size:.76rem;color:#4b5563;margin-top:.42rem;}
+    @media(max-width:560px){.summary-chart-row{grid-template-columns:1fr auto;gap:.42rem;padding:.48rem .54rem}.summary-chart-track{grid-column:1/-1;height:10px}.summary-chart-label{font-size:.82rem}.summary-chart-value{font-size:.82rem}}
+
+
+    /* Prevent old/default theme flash before settings are loaded */
+    body.app-booting .app-container,
+    body.app-booting .footer-custom{opacity:0;visibility:hidden;pointer-events:none;}
+    body.app-booting::before{
+      content:"กำลังโหลดการตั้งค่าระบบ...";
+      position:fixed;inset:0;z-index:99999;display:grid;place-items:center;
+      font-family:'Kanit',sans-serif;font-size:clamp(1rem,3vw,1.25rem);font-weight:500;color:#111;
+      background:#ffffff;
+    }
+    body.app-ready .app-container,
+    body.app-ready .footer-custom{opacity:1;visibility:visible;transition:opacity .16s ease;}
+
+</style>
+</head>
+<body class="app-booting">
+  <main class="app-container my-4 mb-5">
+    <header class="brand-hero brand-modern no-print mb-4">
+      <div class="brand-hero-main">
+        <div class="brand-logo-wrap"><img id="siteLogo" src="https://i.postimg.cc/0Q3TYH1t/2556.png" alt="Logo" class="site-logo"></div>
+        <div class="brand-copy">
+          <div class="brand-heading-line">
+            <h1 id="headerTitle" class="header-title-text">ระบบสั่งเสื้อคณะสีรามจิตติ โรงเรียนหัวหิน</h1>
+          </div>
+          <div id="headerSubtitle" class="brand-subtitle"><i class="fi fi-sr-graduation-cap"></i> ปีการศึกษา 2569 • โรงเรียนหัวหิน</div>
+        </div>
+        <button class="mobile-menu-toggle btn btn-theme" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenuCollapse" aria-expanded="false" aria-controls="mainMenuCollapse"><i class="fi fi-sr-menu-burger"></i></button>
+        <span id="systemStatus" class="visually-hidden"></span>
+      </div>
+      <nav id="mainMenuCollapse" class="menu-card collapse d-lg-block" aria-label="เมนูหลัก">
+        <ul class="nav menu-tabs" id="mainTab" role="tablist">
+          <li class="nav-item" role="presentation"><button class="nav-link active" id="form-tab" data-bs-toggle="tab" data-bs-target="#form-tab-pane" type="button" role="tab"><i class="fi fi-sr-edit"></i> สั่งเสื้อ</button></li>
+          <li class="nav-item" role="presentation"><button class="nav-link" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-tab-pane" type="button" role="tab"><i class="fi fi-sr-list"></i> รายการ</button></li>
+          <li class="nav-item" role="presentation"><button class="nav-link" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard-tab-pane" type="button" role="tab"><i class="fi fi-sr-chart-pie-alt"></i> สรุป</button></li>
+          <li class="nav-item" role="presentation"><button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin-tab-pane" type="button" role="tab"><i class="fi fi-sr-user-lock"></i> แอดมิน</button></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="tab-content" id="mainTabContent">
+      <section class="tab-pane fade show active" id="form-tab-pane" role="tabpanel" tabindex="0">
+        <div class="order-main-flow">
+          <div class="custom-card featured-model-shell h-100">
+            <div class="card-body p-4">
+              <div id="featuredModels" class="row g-3"></div>
+            </div>
+          </div>
+
+          <div class="custom-card order-form-card h-100">
+            <div class="card-body p-4 p-lg-5">
+              <h4 class="section-header-text text-center mb-4"><i class="fi fi-sr-edit"></i> รายการสั่งซื้อเสื้อ</h4>
+              <form id="orderForm">
+                <input type="hidden" id="modelNameSelect" name="modelName" value="แบบหลัก">
+                <div class="mb-3 teacher-picker-wrap">
+                  <label for="teacherNameInput" class="form-label"><i class="fi fi-sr-user"></i> ชื่อ - สกุลผู้สั่ง</label>
+                  <input type="text" class="form-control" id="teacherNameInput" name="fullName" placeholder="พิมพ์หรือเลือกชื่อครู" autocomplete="off" required>
+                  <div id="teacherPickerPanel" class="teacher-picker-panel"></div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label"><i class="fi fi-sr-venus-mars"></i> ประเภทเสื้อ</label>
+                  <div class="style-choice-grid">
+                    <label class="style-choice"><input class="form-check-input" type="radio" name="shirtStyle" id="styleMale" value="ผู้ชาย" checked><span><i class="fi fi-sr-male"></i> ผู้ชาย</span></label>
+                    <label class="style-choice"><input class="form-check-input" type="radio" name="shirtStyle" id="styleFemale" value="ผู้หญิง"><span><i class="fi fi-sr-female"></i> ผู้หญิง</span></label>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="shirtSize" class="form-label"><i class="fi fi-sr-ruler-combined"></i> ไซต์เสื้อ</label>
+                  <select class="form-select" id="shirtSize" name="shirtSize" required></select>
+                </div>
+                <div class="mb-4">
+                  <label for="quantity" class="form-label"><i class="fi fi-sr-shopping-cart-add"></i> จำนวนที่สั่ง</label>
+                  <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" required>
+                </div>
+                <div class="d-grid"><button id="submitOrderButton" type="submit" class="btn btn-submit-custom btn-lg btn-3d"><i class="fi fi-sr-disk"></i> บันทึกคำสั่งซื้อ</button></div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-pane fade" id="list-tab-pane" role="tabpanel" tabindex="0">
+        <div class="orders-panel">
+          <div class="orders-panel-head">
+            <div class="d-flex align-items-center gap-3">
+              <div class="orders-panel-icon"><i class="fi fi-sr-receipt"></i></div>
+              <div>
+                <div class="orders-panel-title">รายการสั่งซื้อทั้งหมด</div>
+                <div class="orders-panel-sub"><i class="fi fi-sr-list-check"></i> ตรวจสอบรายชื่อ ไซส์ จำนวน และเวลาในการสั่งซื้อ</div>
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover custom-table align-middle">
+              <thead class="table-header-custom"><tr><th><i class="fi fi-sr-hastag"></i> ลำดับ</th><th><i class="fi fi-sr-user"></i> ชื่อ - สกุล</th><th><i class="fi fi-sr-list-check"></i> รายละเอียดย่อย</th><th><i class="fi fi-sr-shopping-cart"></i> รวม</th><th class="actions-column public-actions"><i class="fi fi-sr-settings-sliders"></i> จัดการ</th></tr></thead>
+              <tbody id="ordersTableBody"><tr><td colspan="5" class="text-center p-4">กำลังโหลดข้อมูล...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-pane fade" id="dashboard-tab-pane" role="tabpanel" tabindex="0">
+        <div class="summary-luxury-head mb-4">
+          <div class="summary-luxury-icon"><i class="fi fi-sr-sparkles"></i></div>
+          <div>
+            <h4 class="section-header-text mb-1">สรุปภาพรวมการสั่งซื้อ</h4>
+            <p class="mb-0">แผนภูมิรวมจำนวนเสื้อ แยกตามประเภทและไซส์ ใช้ข้อมูลชุดเดียวกับหน้าแอดมิน</p>
+          </div>
+        </div>
+        <div class="summary-luxury-grid mb-4">
+          <div class="summary-card luxury-stat-card stat-orders"><div class="icon"><i class="fi fi-sr-user-check"></i></div><div class="stat-label">ผู้สั่งซื้อแล้ว</div><div id="totalOrdersDisplay" class="stat-value">0</div><div class="stat-note">คน</div></div>
+          <div class="summary-card luxury-stat-card stat-total"><div class="icon"><i class="fi fi-sr-box-open"></i></div><div class="stat-label">ยอดเสื้อรวม</div><div id="totalQuantityDisplay" class="stat-value">0</div><div class="stat-note">ตัว</div></div>
+          <div class="summary-card luxury-stat-card stat-teachers"><div class="icon"><i class="fi fi-sr-users"></i></div><div class="stat-label">จำนวนครูในระบบ</div><div id="totalTeachersDisplay" class="stat-value">0</div><div class="stat-note">รายชื่อ</div></div>
+        </div>
+        <div class="summary-detail-grid">
+          <div class="summary-detail-card"><div class="summary-detail-head"><span><i class="fi fi-sr-venus-mars"></i></span><div><h5>แผนภูมิชาย / หญิง</h5><p>รวมจำนวนที่สั่งตามประเภท</p></div></div><div id="styleSummaryContainer" class="summary-pill-list"></div></div>
+          <div class="summary-detail-card"><div class="summary-detail-head"><span><i class="fi fi-sr-male"></i></span><div><h5>ไซส์ผู้ชาย</h5><p>แผนภูมิแยกจำนวนตามไซส์</p></div></div><div id="maleSizeTableContainer" class="summary-pill-list"></div></div>
+          <div class="summary-detail-card"><div class="summary-detail-head"><span><i class="fi fi-sr-female"></i></span><div><h5>ไซส์ผู้หญิง</h5><p>แผนภูมิแยกจำนวนตามไซส์</p></div></div><div id="femaleSizeTableContainer" class="summary-pill-list"></div></div>
+        </div>
+      </section>
+
+      <section class="tab-pane fade" id="admin-tab-pane" role="tabpanel" tabindex="0">
+        <div id="adminLoginSection" class="row justify-content-center">
+          <div class="col-md-7 col-lg-5">
+            <div class="custom-card"><div class="card-body p-4">
+              <h4 class="section-header-text text-center mb-4"><i class="fi fi-sr-user-lock"></i> เข้าสู่ระบบผู้ดูแล</h4>
+              <form id="adminLoginForm">
+                <div class="mb-3"><label for="adminPassword" class="form-label"><i class="fi fi-sr-key"></i> รหัสผ่าน</label><div class="input-group"><input type="password" class="form-control" id="adminPassword" placeholder="กรอกรหัสผ่าน" autocomplete="current-password" required><button class="btn btn-eye" type="button" id="toggleAdminPassword" aria-label="แสดงหรือซ่อนรหัสผ่าน"><i id="adminPasswordEyeIcon" class="fi fi-sr-eye"></i></button></div></div>
+                <div class="d-grid"><button class="btn btn-submit-custom" type="submit"><i class="fi fi-sr-sign-in-alt"></i> เข้าสู่ระบบ</button></div>
+              </form>
+            </div></div>
+          </div>
+        </div>
+
+        <div id="adminControlSection" class="admin-shell" style="display:none;">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div><h4 class="section-header-text mb-1"><i class="fi fi-sr-settings"></i> ระบบแอดมิน</h4><div id="adminRoleBadge" class="text-muted small"></div></div>
+            <button type="button" id="adminLogoutButton" class="btn btn-outline-secondary rounded-pill"><i class="fi fi-sr-sign-out-alt"></i> ออกจากระบบ</button>
+          </div>
+          <ul class="nav nav-tabs admin-tabs mb-3" id="adminInnerTab" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#admin-orders-pane" type="button"><i class="fi fi-sr-clipboard-list"></i> ผู้สั่งซื้อ</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#admin-models-pane" type="button"><i class="fi fi-sr-picture"></i> ภาพเสื้อ</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#admin-teachers-pane" type="button"><i class="fi fi-sr-users"></i> รายชื่อ</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#admin-settings-pane" type="button"><i class="fi fi-sr-settings"></i> ตั้งค่า</button></li>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane fade" id="admin-settings-pane" tabindex="0">
+              <form id="systemSettingsForm" class="row g-4">
+                <div class="col-lg-8">
+                  <div class="custom-card"><div class="card-body p-4">
+                    <h5 class="sub-header-text mb-3"><i class="fi fi-sr-browser"></i> ข้อมูลหัวเว็บและเครดิต</h5>
+                    <div class="row g-3">
+                      <div class="col-md-6"><label class="form-label"><i class="fi fi-sr-browser"></i> ชื่อระบบ</label><input class="form-control" id="settingSystemName" required></div>
+                      <div class="col-md-6"><label class="form-label"><i class="fi fi-sr-flag"></i> ชื่อคณะสี</label><input class="form-control" id="settingTeamColorName" required></div>
+                      <div class="col-md-4"><label class="form-label"><i class="fi fi-sr-calendar"></i> ปีการศึกษา</label><input class="form-control" id="settingAcademicYear"></div>
+                      <div class="col-md-4"><label class="form-label"><i class="fi fi-sr-school"></i> ชื่อโรงเรียน</label><input class="form-control" id="settingSchoolName"></div>
+                      <div class="col-md-4"><label class="form-label"><i class="fi fi-sr-user-gear"></i> ชื่อผู้พัฒนาระบบ</label><input class="form-control" id="settingDeveloperName"></div>
+                    </div>
+                  </div></div>
+                </div>
+                <div class="col-lg-4">
+                  <div class="custom-card h-100"><div class="card-body p-4">
+                    <h5 class="sub-header-text mb-3"><i class="fi fi-sr-picture"></i> โลโก้หัวเว็บ</h5>
+                    <div class="logo-preview-wrap mb-3" id="logoPreviewWrap" style="display:none;">
+                      <img id="adminLogoPreview" class="logo-preview" alt="Logo Preview">
+                      <button type="button" class="remove-logo-btn" id="removeLogoButton" title="ลบโลโก้"><i class="fi fi-sr-cross-small"></i></button>
+                    </div>
+                    <input class="form-control" type="file" id="logoUploadInput" accept="image/*">
+                    <div class="form-text">รองรับภาพ PNG/JPG แนะนำภาพสี่เหลี่ยมจัตุรัส</div>
+                  </div></div>
+                </div>
+
+                <div class="col-12">
+                  <div class="custom-card"><div class="card-body p-4">
+                    <h5 class="sub-header-text mb-3"><i class="fi fi-sr-palette"></i> ชุดสีหน้าเว็บ</h5>
+                    <div class="row g-3" id="themeOptions">
+                      <div class="col-sm-6 col-lg"><div class="theme-option" data-theme="yellow"><div class="theme-swatch swatch-yellow"></div><strong>ชุดสีเหลือง</strong><div class="small text-muted">เหลืองสด + ดำ</div></div></div>
+                      <div class="col-sm-6 col-lg"><div class="theme-option" data-theme="green"><div class="theme-swatch swatch-green"></div><strong>ชุดสีเขียว</strong><div class="small text-muted">เขียวสด + เขียวเข้ม</div></div></div>
+                      <div class="col-sm-6 col-lg"><div class="theme-option" data-theme="red"><div class="theme-swatch swatch-red"></div><strong>ชุดสีแดง</strong><div class="small text-muted">แดงสด + ดำ</div></div></div>
+                      <div class="col-sm-6 col-lg"><div class="theme-option" data-theme="purple"><div class="theme-swatch swatch-purple"></div><strong>ชุดสีม่วง</strong><div class="small text-muted">ม่วงสด + ม่วงเข้ม</div></div></div>
+                      <div class="col-sm-6 col-lg"><div class="theme-option" data-theme="custom"><div class="theme-swatch swatch-custom"></div><strong>ปรับเอง</strong><div class="small text-muted">เลือกผสมเอง 2 สี</div></div></div>
+                    </div>
+                    <div class="row g-3 align-items-end mt-2">
+                      <div class="col-md-4"><label class="form-label"><i class="fi fi-sr-palette"></i> สีหลัก</label><input type="color" class="form-control form-control-color w-100" id="customPrimaryColorInput" value="#FFE600"></div>
+                      <div class="col-md-4"><label class="form-label"><i class="fi fi-sr-fill"></i> สีรอง</label><input type="color" class="form-control form-control-color w-100" id="customSecondaryColorInput" value="#111111"></div>
+                      <div class="col-md-4"><label class="form-label"><i class="fi fi-sr-eye"></i> แถบสีตัวอย่าง</label><div id="customColorBar" class="custom-color-bar"></div></div>
+                    </div>
+                  </div></div>
+                </div>
+
+                <div class="col-lg-7">
+                  <div class="custom-card h-100"><div class="card-body p-4">
+                    <h5 class="sub-header-text mb-3"><i class="fi fi-sr-power"></i> เปิด/ปิดระบบ</h5>
+                    <div class="row g-3">
+                      <div class="col-md-6"><label class="form-label"><i class="fi fi-sr-power"></i> โหมดเปิดระบบ</label><select class="form-select" id="settingSystemMode"><option value="manual">เปิด/ปิดเอง</option><option value="schedule">กำหนดเวลา</option></select></div>
+                      <div class="col-md-6"><label class="form-label d-block"><i class="fi fi-sr-toggle-on"></i> สถานะเปิดเอง</label><div class="form-check form-switch fs-5 mt-2"><input class="form-check-input" type="checkbox" id="settingManualOpen"><label class="form-check-label" for="settingManualOpen">เปิดรับคำสั่งซื้อ</label></div></div>
+                      <div class="col-md-6 schedule-box"><label class="form-label"><i class="fi fi-sr-clock-three"></i> เวลาเปิด</label><input class="form-control" type="datetime-local" id="settingOpenAt"></div>
+                      <div class="col-md-6 schedule-box"><label class="form-label"><i class="fi fi-sr-clock"></i> เวลาปิด</label><input class="form-control" type="datetime-local" id="settingCloseAt"></div>
+                    </div>
+                  </div></div>
+                </div>
+
+                <div class="col-lg-5">
+                  <div class="custom-card h-100"><div class="card-body p-4">
+                    <h5 class="sub-header-text mb-3"><i class="fi fi-sr-shield-check"></i> สิทธิ์และรหัสผ่าน</h5>
+                    <div class="admin-password-note mb-3"><i class="fi fi-sr-crown"></i> ระบบรหัสผ่านแอดมิน <span>เปลี่ยนรหัสผ่านได้จากหน้านี้โดยไม่แสดงรหัสเดิมในหน้าจอ เพื่อความปลอดภัยของระบบ</span></div>
+                    <div class="permission-card mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="settingAllowUserEdits"><label class="form-check-label" for="settingAllowUserEdits"><strong>อนุญาตให้ผู้ใช้ทั่วไปแก้ไขรายการของตนเอง</strong><small>เมื่อปิดสิทธิ์ ผู้ใช้ทั่วไปจะไม่สามารถแก้ไขจำนวน ไซส์ หรือรายละเอียดเสื้อได้ ต้องให้แอดมินแก้ไขจากหน้าแอดมินเท่านั้น</small></label></div></div>
+                    <div class="permission-card mb-3">
+                      <h6 class="sub-header-text mb-2"><i class="fi fi-sr-key"></i> เปลี่ยนรหัสผ่านแอดมินที่กำลังใช้งาน</h6>
+                      <div class="mb-2">
+                        <label class="form-label"><i class="fi fi-sr-lock"></i> รหัสผ่านเดิม</label>
+                        <div class="input-group"><input type="password" class="form-control" id="currentAdminPassword" placeholder="กรอกรหัสผ่านเดิม" autocomplete="current-password"><button class="btn btn-eye" type="button" id="toggleCurrentAdminPassword" aria-label="แสดงหรือซ่อนรหัสผ่านเดิม"><i id="currentAdminPasswordEyeIcon" class="fi fi-sr-eye"></i></button></div>
+                      </div>
+                      <div class="mb-2">
+                        <label class="form-label"><i class="fi fi-sr-key"></i> รหัสผ่านใหม่</label>
+                        <div class="input-group"><input type="password" class="form-control" id="newAdminPassword" placeholder="กรอกรหัสผ่านใหม่อย่างน้อย 4 ตัวอักษร" autocomplete="new-password"><button class="btn btn-eye" type="button" id="toggleNewAdminPassword" aria-label="แสดงหรือซ่อนรหัสผ่านใหม่"><i id="newAdminPasswordEyeIcon" class="fi fi-sr-eye"></i></button></div>
+                      </div>
+                      <div class="mb-2">
+                        <label class="form-label"><i class="fi fi-sr-check-circle"></i> ยืนยันรหัสผ่านใหม่</label>
+                        <div class="input-group"><input type="password" class="form-control" id="confirmAdminPassword" placeholder="กรอกรหัสผ่านใหม่อีกครั้ง" autocomplete="new-password"><button class="btn btn-eye" type="button" id="toggleConfirmAdminPassword" aria-label="แสดงหรือซ่อนยืนยันรหัสผ่าน"><i id="confirmAdminPasswordEyeIcon" class="fi fi-sr-eye"></i></button></div>
+                      </div>
+                      <div class="d-grid mt-3"><button type="button" id="changeCurrentAdminPasswordButton" class="btn btn-submit-custom btn-3d"><i class="fi fi-sr-key"></i> เปลี่ยนรหัสผ่านแอดมิน</button></div>
+                      <div class="form-text mt-2"><i class="fi fi-sr-info"></i> หากเข้าสู่ระบบด้วยแอดมินสูงสุด จะเปลี่ยนรหัสแอดมินสูงสุด หากเข้าสู่ระบบด้วยแอดมินย่อย จะเปลี่ยนรหัสแอดมินย่อยของตนเอง</div>
+                    </div>
+                    <div id="subPasswordSection" class="permission-card"><label class="form-label"><i class="fi fi-sr-user-gear"></i> รีเซ็ตรหัสผ่านแอดมินย่อย</label><div class="input-group"><input type="password" class="form-control" id="settingSubAdminPassword" placeholder="กรอกรหัสใหม่ของแอดมินย่อย" autocomplete="new-password"><button class="btn btn-eye" type="button" id="toggleSubPassword" aria-label="แสดงหรือซ่อนรหัสแอดมินย่อย"><i id="subPasswordEyeIcon" class="fi fi-sr-eye"></i></button></div><div class="d-grid mt-2"><button type="button" id="changeSubPasswordButton" class="btn btn-outline-theme btn-3d"><i class="fi fi-sr-key"></i> รีเซ็ตรหัสแอดมินย่อย</button></div><div class="form-text"><i class="fi fi-sr-info"></i> ส่วนนี้แสดงเฉพาะแอดมินสูงสุด ใช้สำหรับกำหนดรหัสแอดมินย่อยใหม่โดยไม่ต้องทราบรหัสเดิม</div></div>
+                  </div></div>
+                </div>
+                <div class="col-12 d-grid d-md-flex justify-content-md-end"><button type="submit" id="saveSettingsButton" class="btn btn-submit-custom px-4"><i class="fi fi-sr-disk"></i> บันทึกการตั้งค่า</button></div>
+              </form>
+            </div>
+
+            <div class="tab-pane fade" id="admin-models-pane" tabindex="0">
+              <div class="row g-4">
+                <div class="col-lg-4"><div class="custom-card"><div class="card-body p-4">
+                  <h5 class="sub-header-text mb-3"><i class="fi fi-sr-add-image"></i> เพิ่มภาพเสื้อ</h5>
+                  <form id="shirtModelForm">
+                    <div class="mb-3"><label class="form-label"><i class="fi fi-sr-picture"></i> ไฟล์ภาพเสื้อ</label><input class="form-control" type="file" id="modelImageInput" accept="image/*" required><div class="form-text">รองรับภาพไม่เกิน 5 MB ระบบจะแปลงและแสดงผลเป็น base64</div></div>
+                    <div id="modelUploadPreviewWrap" class="mb-3" style="display:none;"><img id="modelUploadPreview" class="model-upload-preview" alt="ตัวอย่างภาพเสื้อ"><div id="modelUploadFileInfo" class="form-text mt-2"></div></div>
+                    <div class="d-grid"><button id="uploadModelButton" class="btn btn-submit-custom" type="submit"><i class="fi fi-sr-cloud-upload"></i> อัปโหลดภาพเสื้อ</button></div>
+                  </form>
+                </div></div></div>
+                <div class="col-lg-8"><div id="adminModelsGrid" class="row g-3"></div></div>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="admin-teachers-pane" tabindex="0">
+              <div class="row g-4">
+                <div class="col-lg-4"><div class="custom-card"><div class="card-body p-4">
+                  <h5 class="sub-header-text mb-3"><i class="fi fi-sr-user-add"></i> จัดการรายชื่อครู</h5>
+                  <button type="button" id="downloadTeacherSampleButton" class="btn btn-outline-theme w-100 mb-3"><i class="fi fi-sr-file-download"></i> ดาวน์โหลดไฟล์ตัวอย่าง CSV</button>
+                  <div class="mb-3"><label class="form-label"><i class="fi fi-sr-file-csv"></i> เลือกไฟล์รายชื่อครู CSV/TXT</label><input class="form-control" type="file" id="teacherCsvInput" accept=".csv,.txt"><div id="teacherFileNamePreview" class="form-text">ยังไม่ได้เลือกไฟล์</div></div>
+                  <div class="d-grid"><button type="button" id="uploadTeachersButton" class="btn btn-submit-custom"><i class="fi fi-sr-cloud-upload"></i> อัปโหลดรายชื่อจากไฟล์</button></div>
+                  <hr>
+                  <form id="addTeacherForm">
+                    <label class="form-label">เพิ่มรายคน</label>
+                    <div class="input-group"><input class="form-control" id="singleTeacherNameInput" placeholder="ชื่อ - สกุล"><button class="btn btn-submit-custom" type="submit"><i class="fi fi-sr-plus"></i> เพิ่ม</button></div>
+                  </form>
+                </div></div></div>
+                <div class="col-lg-8"><div class="custom-card"><div class="card-body p-3"><div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><h6 class="sub-header-text mb-0"><i class="fi fi-sr-users-alt"></i> ตารางรายชื่อครู</h6><div class="d-flex flex-wrap gap-2"><button type="button" id="selectAllTeachersButton" class="btn btn-outline-theme btn-sm"><i class="fi fi-sr-list-check"></i> เลือกทั้งหมด</button><button type="button" id="deleteSelectedTeachersButton" class="btn btn-outline-danger btn-sm rounded-pill"><i class="fi fi-sr-trash"></i> ลบที่เลือก</button></div></div><div class="table-responsive"><table class="table table-hover custom-table teacher-admin-table"><thead class="table-header-custom"><tr><th style="width:52px" class="text-center"><input class="form-check-input" type="checkbox" id="teacherSelectAllCheckbox" aria-label="เลือกทั้งหมด"></th><th style="width:78px">ลำดับ</th><th>ชื่อ - สกุล</th><th class="actions-column">จัดการ</th></tr></thead><tbody id="teachersTableBody"></tbody></table></div></div></div></div>
+              </div>
+            </div>
+
+            <div class="tab-pane fade show active" id="admin-orders-pane" tabindex="0">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <h5 class="sub-header-text mb-0"><i class="fi fi-sr-clipboard-list"></i> ตรวจสอบผู้สั่งซื้อ</h5>
+                <div class="d-flex flex-wrap gap-2">
+                  <button type="button" id="printOrdersButton" class="btn btn-submit-custom"><i class="fi fi-sr-print"></i> พิมพ์รายการและสรุปจำนวน</button>
+                  <button type="button" id="printStickerButton" class="btn btn-outline-theme btn-3d"><i class="fi fi-sr-label"></i> พิมพ์สติ๊กเกอร์</button>
+                </div>
+              </div>
+              <div class="row g-3 mb-3" id="adminOrderCards"></div>
+              <div class="custom-card mb-4"><div class="card-body p-3"><h6 class="sub-header-text"><i class="fi fi-sr-users"></i> สถานะรายชื่อครู: สั่งแล้ว / ยังไม่ได้สั่ง</h6><div class="table-responsive"><table class="table table-hover custom-table"><thead class="table-header-custom"><tr><th>ลำดับ</th><th>ชื่อ - สกุล</th><th>สถานะ</th><th>ข้อมูลการสั่งซื้อ</th></tr></thead><tbody id="teacherOrderStatusBody"></tbody></table></div></div></div>
+              <div class="custom-card"><div class="card-body p-3"><div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2"><h6 class="sub-header-text mb-0"><i class="fi fi-sr-receipt"></i> รายการสั่งซื้อทั้งหมด</h6><div class="d-flex flex-wrap gap-2"><button type="button" id="selectAllOrderPeopleButton" class="btn btn-outline-theme btn-sm btn-3d"><i class="fi fi-sr-list-check"></i> เลือกทั้งหมด</button><button type="button" id="deleteSelectedOrderPeopleButton" class="btn btn-outline-danger btn-sm rounded-pill btn-3d"><i class="fi fi-sr-trash"></i> ลบที่เลือก</button></div></div><div class="table-responsive"><table class="table table-hover custom-table order-admin-table"><thead class="table-header-custom"><tr><th style="width:46px" class="text-center"><input class="form-check-input" type="checkbox" id="orderPeopleSelectAllCheckbox" aria-label="เลือกทั้งหมด"></th><th><i class="fi fi-sr-hastag"></i> ลำดับ</th><th><i class="fi fi-sr-user"></i> ชื่อ - สกุล</th><th><i class="fi fi-sr-list-check"></i> รายละเอียดย่อย</th><th><i class="fi fi-sr-shopping-cart"></i> รวม</th><th class="actions-column"><i class="fi fi-sr-settings-sliders"></i> จัดการ</th></tr></thead><tbody id="adminOrdersTableBody"></tbody></table></div></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal fade" id="editOrderModal" tabindex="-1" aria-labelledby="editOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"><div class="modal-content custom-modal-content">
+      <div class="modal-header custom-modal-header" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;"><h5 class="modal-title" id="editOrderModalLabel"><i class="fi fi-sr-pencil"></i> แก้ไขรายการสั่งซื้อ</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><form id="editOrderForm">
+        <input type="hidden" id="editOrderID" name="orderID">
+        <div class="row g-3">
+          <div class="col-md-6 teacher-picker-wrap"><label class="form-label"><i class="fi fi-sr-user"></i> ชื่อ - สกุล</label><input type="text" class="form-control" id="editFullName" name="fullName" autocomplete="off" required><div id="editTeacherPickerPanel" class="teacher-picker-panel"></div></div>
+          <input type="hidden" id="editModelName" name="modelName" value="แบบหลัก">
+          <div class="col-md-4"><label class="form-label"><i class="fi fi-sr-venus-mars"></i> ประเภทเสื้อ</label><select class="form-select" id="editShirtStyle" name="shirtStyle"><option value="ผู้ชาย">ผู้ชาย</option><option value="ผู้หญิง">ผู้หญิง</option></select></div>
+          <div class="col-md-4"><label class="form-label"><i class="fi fi-sr-ruler-combined"></i> ไซต์</label><select class="form-select" id="editShirtSize" name="shirtSize" required></select></div>
+          <div class="col-md-4"><label class="form-label"><i class="fi fi-sr-shopping-cart-add"></i> จำนวน</label><input type="number" class="form-control" id="editQuantity" name="quantity" min="1" required></div>
+        </div>
+      </form></div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><i class="fi fi-sr-cross-circle"></i> ปิด</button><button type="button" class="btn btn-submit-custom" id="saveChangesButton"><i class="fi fi-sr-check-circle"></i> บันทึก</button></div>
+    </div></div>
+  </div>
+
+  <footer class="footer-custom no-print">
+    <div class="footer-inner">
+      <p id="footerCredit" class="footer-credit mb-0">
+        <i class="fi fi-sr-copyright"></i> <span id="currentYear"></span>
+        <span class="footer-dot">•</span>
+        <i class="fi fi-sr-school"></i> โรงเรียนหัวหิน
+        <span class="footer-dot">•</span>
+        <i class="fi fi-sr-user-gear"></i> พัฒนาโดย : Mr.Narongwit U-ngern
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    // ============================================================
+    // ตั้งค่าการเปิดเว็บจาก GitHub Pages
+    // 1) Deploy Apps Script เป็น Web App
+    // 2) ตั้งค่า Execute as: Me และ Who has access: Anyone
+    // 3) นำ Web App URL ที่ลงท้าย /exec มาใส่แทนข้อความด้านล่าง
+    // ตัวอย่าง: https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxx/exec
+    // ============================================================
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyMK-YgKDwzm2PnLwXBuDIh6SExoA32KLTvT3GzwbCU1HmTBd0WC9o7PUfG94wT5U8a_w/exec";
+
+    const sizeDetails = {
+      'ผู้ชาย': {
+        'S': { chest: 36, length: 25 },
+        'M': { chest: 38, length: 26 },
+        'L': { chest: 40, length: 27 },
+        'XL': { chest: 42, length: 28 },
+        '2XL': { chest: 44, length: 29 },
+        '3XL': { chest: 46, length: 30 },
+        '4XL': { chest: 48, length: 32 },
+        '5XL': { chest: 50, length: 33 }
+      },
+      'ผู้หญิง': {
+        'S': { chest: 34, length: 23 },
+        'M': { chest: 36, length: 24 },
+        'L': { chest: 38, length: 25 },
+        'XL': { chest: 40, length: 26 },
+        '2XL': { chest: 42, length: 27 }
+      }
+    };
+    const sizeMap = {
+      'ผู้ชาย': Object.keys(sizeDetails['ผู้ชาย']),
+      'ผู้หญิง': Object.keys(sizeDetails['ผู้หญิง'])
+    };
+
+    let state = { settings: {}, teachers: [], shirtModels: [], orders: [], summary: {}, systemOpen: true };
+    let admin = { token: '', role: '' };
+    let selectedTheme = 'yellow';
+    let editModeAdmin = false;
+    let selectedTeacherIDs = new Set();
+    let selectedOrderPersonKeys = new Set();
+    let dashboardDirty = true;
+    let modelsLoaded = false;
+    let modelsLoading = false;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+      bindEvents();
+      populateSizeSelect('shirtSize', 'ผู้ชาย');
+      await refreshData();
+      loadShirtModels(false);
+    });
+
+    function hasGoogleScriptRun_() {
+      return typeof google !== 'undefined' && google.script && google.script.run;
+    }
+
+    function getGasApiUrl_() {
+      return String(GAS_API_URL || '').trim();
+    }
+
+    function gasRun(fnName, ...args) {
+      if (hasGoogleScriptRun_()) {
+        return new Promise((resolve, reject) => {
+          google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fnName](...args);
+        });
+      }
+      return gasApiRunByHiddenFrame_(fnName, args);
+    }
+
+    const gasApiPendingRequests = new Map();
+
+    window.addEventListener('message', event => {
+      const data = event.data || {};
+      if (!data || data.type !== 'GAS_API_RESPONSE' || !data.requestId) return;
+      const pending = gasApiPendingRequests.get(data.requestId);
+      if (!pending) return;
+      clearTimeout(pending.timer);
+      gasApiPendingRequests.delete(data.requestId);
+      setTimeout(() => {
+        pending.form?.remove();
+        pending.iframe?.remove();
+      }, 120);
+      if (data.ok) {
+        pending.resolve(data.data);
+      } else {
+        pending.reject(new Error(data.error || 'เกิดข้อผิดพลาดในการเชื่อมต่อ Apps Script API'));
+      }
+    });
+
+    function gasApiRunByHiddenFrame_(action, args = []) {
+      return new Promise((resolve, reject) => {
+        const apiUrl = getGasApiUrl_();
+        if (!apiUrl || apiUrl.includes('ใส่_WEB_APP_URL')) {
+          reject(new Error('ยังไม่ได้ตั้งค่า GAS_API_URL ในไฟล์ index.html กรุณาใส่ลิงก์ Web App จาก Google Apps Script ที่ลงท้ายด้วย /exec'));
+          return;
+        }
+
+        const requestId = `gas_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const frameName = `gasApiFrame_${requestId}`;
+
+        const iframe = document.createElement('iframe');
+        iframe.name = frameName;
+        iframe.title = 'GAS API Bridge';
+        iframe.style.position = 'fixed';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '-9999px';
+        iframe.style.width = '1px';
+        iframe.style.height = '1px';
+        iframe.style.opacity = '0';
+        iframe.style.border = '0';
+        iframe.setAttribute('aria-hidden', 'true');
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = apiUrl;
+        form.target = frameName;
+        form.acceptCharset = 'UTF-8';
+        form.style.display = 'none';
+
+        const addField = (name, value) => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = name;
+          input.value = value == null ? '' : String(value);
+          form.appendChild(input);
+        };
+
+        addField('action', action);
+        addField('requestId', requestId);
+        addField('args', JSON.stringify(args || []));
+        addField('_ts', Date.now());
+
+        const timer = setTimeout(() => {
+          gasApiPendingRequests.delete(requestId);
+          form.remove();
+          iframe.remove();
+          reject(new Error('เชื่อมต่อ Apps Script API ไม่สำเร็จหรือใช้เวลานานเกินไป กรุณาตรวจสอบ Web App URL และสิทธิ์การเข้าถึงเป็น Anyone'));
+        }, 120000);
+
+        gasApiPendingRequests.set(requestId, { resolve, reject, timer, form, iframe });
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+        form.submit();
+      });
+    }
+
+    async function refreshData() {
+      try {
+        const result = await gasRun('getInitialData');
+        if (!result.success) throw new Error(result.message);
+        const previousModels = state.shirtModels || [];
+        state = Object.assign({}, state, result);
+        if (!Array.isArray(result.shirtModels) || result.shirtModels.length === 0) {
+          state.shirtModels = previousModels;
+        }
+        renderAll();
+        document.body.classList.remove('app-booting');
+        document.body.classList.add('app-ready');
+      } catch (error) {
+        document.body.classList.remove('app-booting');
+        document.body.classList.add('app-ready');
+        Swal.fire('เกิดข้อผิดพลาด', error.message || String(error), 'error');
+      }
+    }
+
+
+    async function refreshOrdersOnly() {
+      try {
+        const result = await gasRun('getOrders');
+        if (!result.success) throw new Error(result.message || 'โหลดรายการสั่งซื้อไม่สำเร็จ');
+        if (typeof result.allowUserEdits !== 'undefined') state.settings.allowUserEdits = result.allowUserEdits;
+        applyOrdersResult(result);
+      } catch (error) {
+        Swal.fire('เกิดข้อผิดพลาด', error.message || String(error), 'error');
+      }
+    }
+
+    async function loadShirtModels(force = false) {
+      if (modelsLoading || (modelsLoaded && !force)) return;
+      modelsLoading = true;
+      const emptyLoading = '<div class="col-12"><div class="empty-state py-4"><span class="spinner-border spinner-border-sm me-2"></span>กำลังโหลดภาพ...</div></div>';
+      if (!state.shirtModels || state.shirtModels.length === 0) {
+        ['featuredModels','publicModelsGrid','adminModelsGrid'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.innerHTML = emptyLoading;
+        });
+      }
+      try {
+        const result = await gasRun('getShirtModels');
+        if (!result.success) throw new Error(result.message || 'โหลดภาพเสื้อไม่สำเร็จ');
+        state.shirtModels = result.data || [];
+        modelsLoaded = true;
+        renderModelSelects();
+        renderModelGrids();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        modelsLoading = false;
+      }
+    }
+
+    function renderAll() {
+      applySettings();
+      renderModelSelects();
+      renderModelGrids();
+      renderOrdersTable();
+      dashboardDirty = true;
+      renderDashboardIfVisible();
+      if (admin.token) renderAdminPanels();
+    }
+
+    function renderDashboardIfVisible(force = false) {
+      const pane = document.getElementById('dashboard-tab-pane');
+      if (!pane) return;
+      if (force || pane.classList.contains('active')) {
+        renderDashboard();
+        dashboardDirty = false;
+      }
+    }
+
+    function bindEvents() {
+      document.querySelectorAll('input[name="shirtStyle"]').forEach(input => {
+        input.addEventListener('change', () => populateSizeSelect('shirtSize', input.value));
+      });
+
+      document.getElementById('orderForm').addEventListener('submit', submitOrder);
+      document.getElementById('adminLoginForm').addEventListener('submit', adminLogin);
+      document.getElementById('adminPassword').addEventListener('keydown', event => { if (event.key === 'Enter') document.getElementById('adminLoginForm').requestSubmit(); });
+      bindTeacherPicker('teacherNameInput', 'teacherPickerPanel');
+      bindTeacherPicker('editFullName', 'editTeacherPickerPanel');
+      document.addEventListener('click', event => {
+        if (!event.target.closest('.teacher-picker-wrap')) hideAllTeacherPickers();
+      });
+      document.getElementById('toggleAdminPassword').addEventListener('click', () => togglePasswordInput('adminPassword', 'adminPasswordEyeIcon'));
+      document.getElementById('toggleCurrentAdminPassword')?.addEventListener('click', () => togglePasswordInput('currentAdminPassword', 'currentAdminPasswordEyeIcon'));
+      document.getElementById('toggleNewAdminPassword')?.addEventListener('click', () => togglePasswordInput('newAdminPassword', 'newAdminPasswordEyeIcon'));
+      document.getElementById('toggleConfirmAdminPassword')?.addEventListener('click', () => togglePasswordInput('confirmAdminPassword', 'confirmAdminPasswordEyeIcon'));
+      document.getElementById('toggleSubPassword')?.addEventListener('click', () => togglePasswordInput('settingSubAdminPassword', 'subPasswordEyeIcon'));
+      document.getElementById('changeCurrentAdminPasswordButton')?.addEventListener('click', changeCurrentAdminPassword);
+      document.getElementById('changeSubPasswordButton')?.addEventListener('click', changeSubAdminPassword);
+      document.getElementById('adminLogoutButton').addEventListener('click', adminLogout);
+      document.getElementById('systemSettingsForm').addEventListener('submit', saveSettings);
+      document.getElementById('shirtModelForm').addEventListener('submit', addModel);
+      document.getElementById('modelImageInput').addEventListener('change', showModelImagePreview);
+      document.getElementById('customPrimaryColorInput').addEventListener('input', () => updateCustomColorPreview(true));
+      document.getElementById('customSecondaryColorInput').addEventListener('input', () => updateCustomColorPreview(true));
+      document.getElementById('addTeacherForm').addEventListener('submit', addTeacher);
+      document.getElementById('teacherCsvInput').addEventListener('change', showTeacherFileName);
+      document.getElementById('uploadTeachersButton').addEventListener('click', importTeachers);
+      document.getElementById('downloadTeacherSampleButton').addEventListener('click', downloadTeacherSample);
+      document.getElementById('logoUploadInput').addEventListener('change', uploadLogoFile);
+      document.getElementById('removeLogoButton').addEventListener('click', removeLogoFile);
+      document.getElementById('settingSystemMode').addEventListener('change', toggleScheduleFields);
+      document.getElementById('saveChangesButton').addEventListener('click', saveOrderChanges);
+      document.getElementById('editShirtStyle').addEventListener('change', () => populateSizeSelect('editShirtSize', document.getElementById('editShirtStyle').value));
+      document.getElementById('printOrdersButton').addEventListener('click', printOrders);
+      document.getElementById('printStickerButton').addEventListener('click', printStickers);
+      document.getElementById('selectAllTeachersButton').addEventListener('click', toggleAllTeacherSelections);
+      document.getElementById('deleteSelectedTeachersButton').addEventListener('click', deleteSelectedTeachers);
+      document.getElementById('teacherSelectAllCheckbox').addEventListener('change', event => setAllTeacherSelections(event.target.checked));
+      document.getElementById('teachersTableBody').addEventListener('change', event => {
+        const checkbox = event.target.closest('.teacher-select-checkbox');
+        if (!checkbox) return;
+        updateTeacherSelection(checkbox.dataset.teacherId, checkbox.checked);
+      });
+      document.getElementById('selectAllOrderPeopleButton').addEventListener('click', toggleAllOrderPersonSelections);
+      document.getElementById('deleteSelectedOrderPeopleButton').addEventListener('click', deleteSelectedOrderGroups);
+      document.getElementById('orderPeopleSelectAllCheckbox').addEventListener('change', event => setAllOrderPersonSelections(event.target.checked));
+      document.getElementById('adminOrdersTableBody').addEventListener('change', event => {
+        const checkbox = event.target.closest('.order-person-select-checkbox');
+        if (!checkbox) return;
+        updateOrderPersonSelection(checkbox.dataset.personKey, checkbox.checked);
+      });
+
+
+      document.getElementById('dashboard-tab').addEventListener('shown.bs.tab', () => renderDashboardIfVisible(true));
+      document.querySelectorAll('#adminInnerTab button[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', event => renderActiveAdminPane(event.target.getAttribute('data-bs-target')));
+      });
+
+      document.getElementById('themeOptions').addEventListener('click', e => {
+        const option = e.target.closest('.theme-option');
+        if (!option) return;
+        selectedTheme = option.dataset.theme;
+        applyTheme(selectedTheme, getCustomColorsFromInputs());
+        markThemeOption(selectedTheme);
+        if (selectedTheme === 'custom') updateCustomColorPreview(true);
+      });
+    }
+
+    function togglePasswordInput(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (!input || !icon) return;
+      const visible = input.type === 'text';
+      input.type = visible ? 'password' : 'text';
+      icon.className = visible ? 'fi fi-sr-eye' : 'fi fi-sr-eye-crossed';
+    }
+
+    function applySettings() {
+      const s = state.settings || {};
+      selectedTheme = normalizeThemeName(s.theme || selectedTheme);
+      applyCustomColorVars(s.customPrimaryColor, s.customSecondaryColor);
+      applyTheme(selectedTheme, s);
+      markThemeOption(selectedTheme);
+
+      const displayTitle = `${s.systemName || 'ระบบสั่งเสื้อคณะสี'} ${s.teamColorName || ''}`.trim();
+      const academicYearText = s.academicYear ? `ปีการศึกษา ${escapeHtml(s.academicYear)}` : 'ปีการศึกษา';
+      const schoolText = escapeHtml(s.schoolName || 'โรงเรียนหัวหิน');
+      document.title = `${displayTitle} ${s.academicYear || ''}`.trim();
+      document.getElementById('headerTitle').textContent = displayTitle;
+      document.getElementById('headerSubtitle').innerHTML = `<i class="fi fi-sr-graduation-cap"></i> ${academicYearText} <span class="footer-dot">•</span> <i class="fi fi-sr-school"></i> ${schoolText}`;
+      document.getElementById('siteLogo').src = s.logoUrl || 'https://i.postimg.cc/0Q3TYH1t/2556.png';
+      document.getElementById('footerCredit').innerHTML = `<i class="fi fi-sr-copyright"></i> ${new Date().getFullYear()} <span class="footer-dot">•</span> <i class="fi fi-sr-school"></i> ${schoolText} <span class="footer-dot">•</span> <i class="fi fi-sr-user-gear"></i> พัฒนาโดย : ${escapeHtml(s.developerName || 'Mr.Narongwit U-ngern')}`;
+
+      const open = Boolean(state.systemOpen);
+      const status = document.getElementById('systemStatus');
+      if (status) { status.className = 'visually-hidden'; status.textContent = ''; }
+      document.getElementById('submitOrderButton').disabled = !open;
+    }
+
+    function normalizeThemeName(theme) {
+      const themeMap = {
+        'gold-yellow':'yellow','pastel-yellow':'yellow','blend-sunrise':'yellow','blend-sky':'yellow','blend-mint':'yellow','blend-violet':'yellow','blend-rose':'yellow',
+        'gold-green':'green','pastel-green':'green',
+        'gold-red':'red','pastel-red':'red',
+        'gold-purple':'purple','pastel-purple':'purple',
+        'blend-custom':'custom'
+      };
+      return themeMap[theme] || theme || 'yellow';
+    }
+
+    function applyTheme(theme, colorSource = {}) {
+      const allThemes = ['theme-yellow','theme-green','theme-red','theme-purple','theme-custom'];
+      document.body.classList.remove(...allThemes);
+      const nextTheme = normalizeThemeName(theme || 'yellow');
+      if (nextTheme === 'custom') applyCustomColorVars(colorSource.customPrimaryColor, colorSource.customSecondaryColor);
+      document.body.classList.add(`theme-${nextTheme}`);
+    }
+
+    function applyCustomColorVars(primary, secondary) {
+      const p = primary || document.getElementById('customPrimaryColorInput')?.value || '#FFE600';
+      const s = secondary || document.getElementById('customSecondaryColorInput')?.value || '#111111';
+      document.documentElement.style.setProperty('--custom-primary', p);
+      document.documentElement.style.setProperty('--custom-secondary', s);
+      const bar = document.getElementById('customColorBar');
+      if (bar) bar.style.background = `linear-gradient(135deg, ${p}, ${s})`;
+    }
+
+    function getCustomColorsFromInputs() {
+      return {
+        customPrimaryColor: document.getElementById('customPrimaryColorInput')?.value || '#FFE600',
+        customSecondaryColor: document.getElementById('customSecondaryColorInput')?.value || '#111111'
+      };
+    }
+
+    function updateCustomColorPreview(selectCustom = false) {
+      if (selectCustom) selectedTheme = 'custom';
+      applyCustomColorVars();
+      if (selectCustom) {
+        applyTheme('custom', getCustomColorsFromInputs());
+        markThemeOption('custom');
+      }
+    }
+
+    function markThemeOption(theme) {
+      document.querySelectorAll('.theme-option').forEach(el => el.classList.toggle('active', el.dataset.theme === theme));
+    }
+
+    function fillSettingsForm() {
+      const s = state.settings || {};
+      document.getElementById('settingSystemName').value = s.systemName || '';
+      document.getElementById('settingTeamColorName').value = s.teamColorName || '';
+      document.getElementById('settingAcademicYear').value = s.academicYear || '';
+      document.getElementById('settingSchoolName').value = s.schoolName || '';
+      document.getElementById('settingDeveloperName').value = s.developerName || '';
+      document.getElementById('settingSystemMode').value = s.systemMode || 'manual';
+      document.getElementById('settingManualOpen').checked = s.manualOpen === true || s.manualOpen === 'true';
+      document.getElementById('settingOpenAt').value = toDatetimeLocal(s.openAt || '');
+      document.getElementById('settingCloseAt').value = toDatetimeLocal(s.closeAt || '');
+      document.getElementById('settingAllowUserEdits').checked = s.allowUserEdits === true || s.allowUserEdits === 'true';
+      ['currentAdminPassword', 'newAdminPassword', 'confirmAdminPassword', 'settingSubAdminPassword'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.value = '';
+      });
+      document.getElementById('subPasswordSection').style.display = admin.role === 'super' ? 'block' : 'none';
+      const changeBtn = document.getElementById('changeSubPasswordButton');
+      if (changeBtn) changeBtn.style.display = admin.role === 'super' ? '' : 'none';
+      document.getElementById('customPrimaryColorInput').value = s.customPrimaryColor || '#FFE600';
+      document.getElementById('customSecondaryColorInput').value = s.customSecondaryColor || '#111111';
+      applyCustomColorVars(s.customPrimaryColor, s.customSecondaryColor);
+      renderLogoPreview(s.logoUrl);
+      toggleScheduleFields();
+    }
+
+    function renderLogoPreview(url) {
+      const wrap = document.getElementById('logoPreviewWrap');
+      const img = document.getElementById('adminLogoPreview');
+      if (url) {
+        img.src = url;
+        wrap.style.display = 'inline-block';
+      } else {
+        wrap.style.display = 'none';
+        img.removeAttribute('src');
+      }
+    }
+
+    function toggleScheduleFields() {
+      const mode = document.getElementById('settingSystemMode').value;
+      document.querySelectorAll('.schedule-box').forEach(el => el.style.display = mode === 'schedule' ? 'block' : 'none');
+    }
+
+    function bindTeacherPicker(inputId, panelId) {
+      const input = document.getElementById(inputId);
+      const panel = document.getElementById(panelId);
+      if (!input || !panel) return;
+      const open = () => { renderTeacherPicker(input.value, inputId, panelId); showTeacherPicker(panelId); };
+      input.addEventListener('input', open);
+      input.addEventListener('focus', open);
+      input.addEventListener('click', open);
+      input.addEventListener('keydown', event => {
+        if (event.key === 'Escape') hideTeacherPicker(panelId);
+      });
+    }
+
+    function renderTeacherPicker(filterText = '', inputId = 'teacherNameInput', panelId = 'teacherPickerPanel') {
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+      const query = normalizeName(filterText || '');
+      const teachers = (state.teachers || []).filter(t => !query || normalizeName(t.fullName).includes(query)).slice(0, 60);
+      if (!teachers.length) {
+        panel.innerHTML = '<div class="teacher-picker-empty"><i class="fi fi-sr-info"></i> ไม่พบรายชื่อที่ตรงกัน สามารถพิมพ์ชื่อเองได้</div>';
+        return;
+      }
+      panel.innerHTML = `<div class="teacher-picker-grid">${teachers.map((teacher, index) => `<button type="button" class="teacher-picker-item" onclick="selectTeacherName('${escapeAttr(teacher.fullName)}','${inputId}','${panelId}')"><span class="teacher-no">${index + 1}</span><span>${escapeHtml(teacher.fullName)}</span></button>`).join('')}</div>`;
+    }
+
+    function showTeacherPicker(panelId = 'teacherPickerPanel') {
+      hideAllTeacherPickers(panelId);
+      const panel = document.getElementById(panelId);
+      if (panel) panel.classList.add('is-open');
+    }
+
+    function hideTeacherPicker(panelId = 'teacherPickerPanel') {
+      const panel = document.getElementById(panelId);
+      if (panel) panel.classList.remove('is-open');
+    }
+
+    function hideAllTeacherPickers(exceptPanelId = '') {
+      document.querySelectorAll('.teacher-picker-panel').forEach(panel => {
+        if (panel.id !== exceptPanelId) panel.classList.remove('is-open');
+      });
+    }
+
+    function selectTeacherName(fullName, inputId = 'teacherNameInput', panelId = 'teacherPickerPanel') {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      input.value = fullName;
+      hideTeacherPicker(panelId);
+      input.focus();
+    }
+
+    function openImagePreviewByUrl(encodedUrl, title = 'ภาพเสื้อ') {
+      const url = decodeURIComponent(encodedUrl || '');
+      if (!url) return;
+      Swal.fire({
+        title: title || 'ภาพเสื้อ',
+        imageUrl: url,
+        imageAlt: title || 'ภาพเสื้อ',
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: 'min(92vw, 900px)',
+        customClass: { popup: 'image-preview-popup' }
+      });
+    }
+
+    function renderModelSelects() {
+      const modelField = document.getElementById('modelNameSelect');
+      if (modelField) modelField.value = 'แบบหลัก';
+      const editField = document.getElementById('editModelName');
+      if (editField) editField.value = 'แบบหลัก';
+    }
+
+    function renderModelGrids() {
+      const models = state.shirtModels || [];
+      const empty = '<div class="col-12"><div class="empty-state"><i class="fi fi-sr-picture fs-2"></i><div>ยังไม่มีภาพเสื้อ กรุณาเพิ่มจากระบบแอดมิน</div></div></div>';
+      const html = models.length ? models.map(modelCardHtml).join('') : empty;
+      const publicGrid = document.getElementById('publicModelsGrid');
+      if (publicGrid) publicGrid.innerHTML = html;
+      const featured = document.getElementById('featuredModels');
+      if (featured) featured.innerHTML = models.length ? models.map(modelCardHtml).join('') : empty;
+      const adminGrid = document.getElementById('adminModelsGrid');
+      if (admin.token && adminGrid) adminGrid.innerHTML = models.length ? models.map(adminModelCardHtml).join('') : empty;
+    }
+
+    function modelCardHtml(model) {
+      const imgUrl = model.imageUrl || '';
+      return `<div class="col-12 col-xl-10 col-xxl-9"><button type="button" class="model-card model-card-button public-shirt-card h-100 w-100" onclick="openImagePreviewByUrl('${encodeURIComponent(imgUrl)}', 'ภาพเสื้อ')" aria-label="เปิดดูภาพเสื้อ">
+        <img src="${escapeAttr(imgUrl)}" alt="ภาพเสื้อ" loading="lazy">
+      </button></div>`;
+    }
+
+    function adminModelCardHtml(model) {
+      const imgUrl = model.imageUrl || '';
+      return `<div class="col-md-6"><div class="model-card h-100">
+        <button type="button" class="model-image-button" onclick="openImagePreviewByUrl('${encodeURIComponent(imgUrl)}', 'ภาพเสื้อ')"><img src="${escapeAttr(imgUrl)}" alt="ภาพเสื้อ" loading="lazy"></button>
+        <div class="p-3 d-flex justify-content-end align-items-center gap-2">
+          <button class="btn btn-outline-danger btn-sm rounded-pill btn-3d" onclick="deleteModel('${model.modelID}')"><i class="fi fi-sr-trash"></i> ลบ</button>
+        </div>
+      </div></div>`;
+    }
+
+    function getSizeDetail(style, size) {
+      return (sizeDetails[style] || {})[size] || null;
+    }
+
+    function sizeOptionLabel(style, size) {
+      const detail = getSizeDetail(style, size);
+      return detail ? `${size} — รอบอก ${detail.chest} นิ้ว / ยาว ${detail.length} นิ้ว` : `${size} — ยังไม่มีข้อมูลขนาด`;
+    }
+
+    function populateSizeSelect(selectId, style, selectedValue = '') {
+      const select = document.getElementById(selectId);
+      if (!select) return;
+      let sizes = [...(sizeMap[style] || sizeMap['ผู้ชาย'])];
+      if (selectedValue && !sizes.includes(selectedValue)) sizes.push(selectedValue);
+
+      const placeholderSelected = !selectedValue ? 'selected' : '';
+      const placeholderOption = `<option value="" disabled ${placeholderSelected}>เลือกไซต์</option>`;
+      const sizeOptions = sizes
+        .map(size => `<option value="${size}" ${size === selectedValue ? 'selected' : ''}>${sizeOptionLabel(style, size)}</option>`)
+        .join('');
+      select.innerHTML = placeholderOption + sizeOptions;
+      select.value = selectedValue || '';
+    }
+
+    function resetOrderFormAfterSubmit(form) {
+      if (!form) return;
+      form.reset();
+      document.getElementById('teacherNameInput').value = '';
+      document.getElementById('styleMale').checked = true;
+      document.getElementById('styleFemale').checked = false;
+      document.getElementById('quantity').value = 1;
+      populateSizeSelect('shirtSize', 'ผู้ชาย');
+      hideAllTeacherPickers();
+    }
+
+    async function submitOrder(event) {
+      event.preventDefault();
+      if (!state.systemOpen) return Swal.fire('ระบบปิดอยู่', 'ขณะนี้ระบบยังไม่เปิดรับคำสั่งซื้อ', 'warning');
+      const form = event.currentTarget;
+      const data = Object.fromEntries(new FormData(form).entries());
+      if (!data.shirtSize) {
+        populateSizeSelect('shirtSize', data.shirtStyle || 'ผู้ชาย');
+        document.getElementById('shirtSize')?.focus();
+        return Swal.fire('ยังไม่ได้เลือกไซต์เสื้อ', 'กรุณาเลือกไซต์เสื้อจากช่องรายการก่อนบันทึกข้อมูล', 'warning');
+      }
+      data.quantity = Number(data.quantity || 1);
+      await saveOrderWithDuplicateCheck(data, form);
+    }
+
+    async function saveOrderWithDuplicateCheck(data, form) {
+      try {
+        setButtonLoading('submitOrderButton', true, 'กำลังตรวจสอบ...');
+        let result = await gasRun('saveOrder', data);
+        setButtonLoading('submitOrderButton', false);
+
+        if (result.duplicateRequired) {
+          const decision = await showDuplicateOrderDialog(result, data);
+          if (!decision.isConfirmed) {
+            await Swal.fire({ title: 'ยังไม่บันทึกรายการเพิ่ม', text: 'ระบบยกเลิกการสั่งเพิ่มตามที่เลือกไว้', icon: 'info', confirmButtonText: 'รับทราบ' });
+            return;
+          }
+          const confirmMode = result.duplicateType === 'exact' ? 'mergeExact' : 'addDifferent';
+          setButtonLoading('submitOrderButton', true, result.duplicateType === 'exact' ? 'กำลังรวมจำนวน...' : 'กำลังบันทึกเพิ่ม...');
+          result = await gasRun('saveOrder', Object.assign({}, data, { confirmMode }));
+          setButtonLoading('submitOrderButton', false);
+        }
+
+        if (result.success) {
+          applyOrdersResult(result);
+          await Swal.fire({ title: 'สำเร็จ', text: result.message, icon: 'success', confirmButtonText: 'เรียบร้อย' });
+          resetOrderFormAfterSubmit(form);
+        } else {
+          Swal.fire('ไม่สำเร็จ', result.message, 'error');
+        }
+      } catch (error) {
+        setButtonLoading('submitOrderButton', false);
+        Swal.fire('เกิดข้อผิดพลาด', error.message || String(error), 'error');
+      }
+    }
+
+    function duplicateOrderListHtml(duplicate) {
+      const rows = (duplicate && duplicate.existingOrders ? duplicate.existingOrders : []).map(item => `
+        <div class="duplicate-item"><span><i class="fi fi-sr-tshirt"></i> ${escapeHtml(item.shirtStyle)} · ไซส์ ${escapeHtml(item.shirtSize)}</span><strong>${Number(item.quantity || 0).toLocaleString('th-TH')} ตัว</strong></div>
+      `).join('');
+      return rows || '<div class="duplicate-item"><span>ไม่มีรายละเอียดเดิม</span><strong>0 ตัว</strong></div>';
+    }
+
+    function showDuplicateOrderDialog(result, data) {
+      const d = result.duplicate || {};
+      const isExact = result.duplicateType === 'exact';
+      const title = isExact ? 'พบรายการเดิมที่สั่งไว้แล้ว' : 'พบชื่อผู้สั่งซื้อเดิม';
+      const intro = isExact
+        ? `ชื่อ <b>${escapeHtml(data.fullName)}</b> เคยสั่ง <b>${escapeHtml(data.shirtStyle)} ไซส์ ${escapeHtml(data.shirtSize)}</b> แล้ว จำนวนเดิม <b>${Number(d.exactTotal || 0).toLocaleString('th-TH')} ตัว</b>`
+        : `ชื่อ <b>${escapeHtml(data.fullName)}</b> มีรายการสั่งซื้ออยู่แล้ว หากเป็นคนละไซส์หรือคนละประเภท สามารถสั่งเพิ่มได้`;
+      return Swal.fire({
+        title,
+        icon: 'question',
+        html: `<div class="duplicate-check-box"><p>${intro}</p><div class="duplicate-list">${duplicateOrderListHtml(d)}</div><div class="duplicate-new"><i class="fi fi-sr-plus"></i> รายการใหม่: <b>${escapeHtml(data.shirtStyle)} · ไซส์ ${escapeHtml(data.shirtSize)} · ${Number(data.quantity || 1).toLocaleString('th-TH')} ตัว</b></div></div>`,
+        showCancelButton: true,
+        confirmButtonText: isExact ? 'เพิ่มจำนวนในรายการเดิม' : 'สั่งเพิ่มรายการนี้',
+        cancelButtonText: 'ไม่สั่งเพิ่ม',
+        reverseButtons: true,
+        customClass: { popup: 'duplicate-swal', confirmButton: 'swal-3d-confirm', cancelButton: 'swal-3d-cancel' }
+      });
+    }
+
+    function buildClientOrderSummary(orders) {
+      const summary = { totalQuantity: 0, totalOrders: (orders || []).length, byStyle: { 'ผู้ชาย': 0, 'ผู้หญิง': 0 }, bySize: { 'ผู้ชาย': {}, 'ผู้หญิง': {} } };
+      (orders || []).forEach(order => {
+        const quantity = Number(order.quantity || 0);
+        const style = order.shirtStyle || 'ไม่ระบุ';
+        const size = order.shirtSize || 'ไม่ระบุ';
+        summary.totalQuantity += quantity;
+        if (!summary.byStyle[style]) summary.byStyle[style] = 0;
+        summary.byStyle[style] += quantity;
+        if (!summary.bySize[style]) summary.bySize[style] = {};
+        if (!summary.bySize[style][size]) summary.bySize[style][size] = 0;
+        summary.bySize[style][size] += quantity;
+      });
+      return summary;
+    }
+
+    function applyOrdersResult(result) {
+      if (Array.isArray(result.orders)) state.orders = result.orders;
+      else if (Array.isArray(result.data)) state.orders = result.data;
+      state.summary = result.summary || buildClientOrderSummary(state.orders || []);
+      selectedOrderPersonKeys = new Set(Array.from(selectedOrderPersonKeys).filter(key => groupOrdersByPerson(state.orders || []).some(group => group.key === key)));
+      renderOrdersTable();
+      renderTeacherOrderStatus();
+      dashboardDirty = true;
+      renderDashboardIfVisible(true);
+      if (admin.token && getActiveAdminPaneTarget() === '#admin-orders-pane') renderAdminOrders();
+    }
+
+    function applyTeachersResult(result) {
+      if (Array.isArray(result.teachers)) state.teachers = result.teachers;
+      else if (Array.isArray(result.data)) state.teachers = result.data;
+      selectedTeacherIDs = new Set(Array.from(selectedTeacherIDs).filter(id => (state.teachers || []).some(t => t.teacherID === id)));
+      renderTeacherPickerPanel('teacherNameInput', 'teacherPickerPanel');
+      renderTeacherPickerPanel('editFullName', 'editTeacherPickerPanel');
+      dashboardDirty = true;
+      renderDashboardIfVisible();
+      if (admin.token) renderActiveAdminPane();
+    }
+
+    function applyModelsResult(result) {
+      if (Array.isArray(result.models)) state.shirtModels = result.models;
+      else if (Array.isArray(result.data)) state.shirtModels = result.data;
+      modelsLoaded = true;
+      renderModelSelects();
+      renderModelGrids();
+    }
+
+    function groupOrdersByPerson(orders) {
+      const map = new Map();
+      (orders || []).forEach(order => {
+        const key = normalizeName(order.fullName) || `unknown-${order.orderID}`;
+        if (!map.has(key)) map.set(key, { key, fullName: order.fullName || 'ไม่ระบุชื่อ', total: 0, latestTime: order.timestamp || '', orders: [] });
+        const group = map.get(key);
+        group.orders.push(order);
+        group.total += Number(order.quantity || 0);
+        if (!group.latestTime || new Date(order.timestamp || 0) > new Date(group.latestTime || 0)) group.latestTime = order.timestamp || group.latestTime;
+      });
+      return Array.from(map.values()).sort((a, b) => new Date(b.latestTime || 0) - new Date(a.latestTime || 0));
+    }
+
+    function groupedOrderDetailsHtml(group, editable = false, adminMode = false) {
+      const items = (group.orders || []).slice().sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+      return `<div class="grouped-order-details">${items.map(order => `
+        <div class="grouped-order-detail">
+          <div>
+            <div class="grouped-order-detail-main">
+              <span><i class="fi fi-sr-venus-mars"></i> ${escapeHtml(order.shirtStyle || '-')}</span>
+              <span><i class="fi fi-sr-ruler-combined"></i> ไซต์ ${escapeHtml(order.shirtSize || '-')}</span>
+              <span><i class="fi fi-sr-shopping-cart"></i> ${Number(order.quantity || 0).toLocaleString('th-TH')} ตัว</span>
+            </div>
+            <div class="grouped-order-detail-time"><i class="fi fi-sr-clock"></i> ${formatDate(order.timestamp)}</div>
+          </div>
+          ${editable ? `<div class="grouped-order-actions"><button class="btn btn-outline-theme btn-sm btn-3d" onclick="openEditOrder('${order.orderID}', ${adminMode ? 'true' : 'false'})"><i class="fi fi-sr-pencil"></i> แก้ไข</button>${adminMode ? `<button class="btn btn-outline-danger btn-sm rounded-pill btn-3d" onclick="removeOrder('${order.orderID}')"><i class="fi fi-sr-trash"></i> ลบ</button>` : ''}</div>` : ''}
+        </div>`).join('')}</div>`;
+    }
+
+    function groupedOrderActionsHtml(group, adminMode = false) {
+      const items = (group.orders || []).slice().sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+      return `<div class="grouped-order-action-list">${items.map((order, idx) => `
+        <div class="grouped-order-action-row">
+          <span class="action-label"><i class="fi fi-sr-ruler-combined"></i> ${escapeHtml(order.shirtStyle || '-')} ${escapeHtml(order.shirtSize || '-')}</span>
+          <span class="grouped-order-actions">
+            <button class="btn btn-outline-theme btn-sm btn-3d" onclick="openEditOrder('${order.orderID}', ${adminMode ? 'true' : 'false'})"><i class="fi fi-sr-pencil"></i></button>
+            ${adminMode ? `<button class="btn btn-outline-danger btn-sm rounded-pill btn-3d" onclick="removeOrder('${order.orderID}')"><i class="fi fi-sr-trash"></i></button>` : ''}
+          </span>
+        </div>`).join('')}</div>`;
+    }
+
+    function renderOrdersTable() {
+      const tbody = document.getElementById('ordersTableBody');
+      const canEdit = state.settings && (state.settings.allowUserEdits === true || state.settings.allowUserEdits === 'true');
+      document.querySelectorAll('.public-actions').forEach(th => th.style.display = canEdit ? '' : 'none');
+      const groups = groupOrdersByPerson(state.orders || []);
+      if (groups.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${canEdit ? 5 : 4}" class="text-center p-4">ยังไม่มีรายการสั่งซื้อ</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = groups.map((group, index) => `<tr>
+        <td data-label="ลำดับ">${index + 1}</td>
+        <td data-label="ชื่อ"><div class="grouped-order-name"><i class="fi fi-sr-user"></i> ${escapeHtml(group.fullName)}</div></td>
+        <td data-label="รายละเอียด">${groupedOrderDetailsHtml(group, false, false)}</td>
+        <td data-label="รวม"><span class="group-total-badge"><i class="fi fi-sr-shopping-cart"></i> ${Number(group.total || 0).toLocaleString('th-TH')} ตัว</span></td>
+        <td data-label="จัดการ" class="public-actions" style="display:${canEdit ? '' : 'none'}">${groupedOrderActionsHtml(group, false)}</td>
+      </tr>`).join('');
+    }
+
+    function renderDashboard() {
+      const summary = state.summary || {};
+      const orderedPeople = groupOrdersByPerson(state.orders || []).length;
+      document.getElementById('totalOrdersDisplay').textContent = orderedPeople || 0;
+      document.getElementById('totalQuantityDisplay').textContent = Number(summary.totalQuantity || 0).toLocaleString('th-TH');
+      document.getElementById('totalTeachersDisplay').textContent = (state.teachers || []).length;
+      renderSummaryChart('styleSummaryContainer', summary.byStyle || {}, 'fi fi-sr-venus-mars');
+      renderSizeChart('maleSizeTableContainer', summary.bySize && summary.bySize['ผู้ชาย'], 'fi fi-sr-male');
+      renderSizeChart('femaleSizeTableContainer', summary.bySize && summary.bySize['ผู้หญิง'], 'fi fi-sr-female');
+    }
+
+    function sortSizeEntries(dataObj) {
+      const sizeOrder = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL','6XL','7XL'];
+      return Object.entries(dataObj || {}).sort((a, b) => {
+        const ia = sizeOrder.indexOf(String(a[0]).toUpperCase());
+        const ib = sizeOrder.indexOf(String(b[0]).toUpperCase());
+        if (ia !== -1 || ib !== -1) return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+        return String(a[0]).localeCompare(String(b[0]), 'th', { numeric: true });
+      });
+    }
+
+    function renderSummaryChart(containerId, dataObj, iconClass = 'fi fi-sr-chart-histogram', entriesOverride) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const entries = entriesOverride || Object.entries(dataObj || {}).sort((a, b) => String(a[0]).localeCompare(String(b[0]), 'th'));
+      const visibleEntries = entries.filter(([, qty]) => Number(qty || 0) > 0);
+      if (visibleEntries.length === 0) {
+        container.innerHTML = '<div class="summary-empty-mini"><i class="fi fi-sr-info"></i> ยังไม่มีข้อมูล</div>';
+        return;
+      }
+      const maxQty = Math.max(...visibleEntries.map(([, qty]) => Number(qty || 0)), 1);
+      const total = visibleEntries.reduce((sum, [, qty]) => sum + Number(qty || 0), 0);
+      container.innerHTML = `<div class="summary-chart-list">${visibleEntries.map(([label, qty]) => {
+        const amount = Number(qty || 0);
+        const percent = Math.max(4, Math.round((amount / maxQty) * 100));
+        return `<div class="summary-chart-row">
+          <div class="summary-chart-label"><i class="${iconClass}"></i><span>${escapeHtml(label)}</span></div>
+          <div class="summary-chart-track" aria-label="${escapeAttr(label)} ${amount} ตัว"><div class="summary-chart-bar" style="width:${percent}%"></div></div>
+          <div class="summary-chart-value">${amount.toLocaleString('th-TH')} ตัว</div>
+        </div>`;
+      }).join('')}</div><div class="summary-chart-note"><i class="fi fi-sr-badge-check"></i> รวม ${total.toLocaleString('th-TH')} ตัว</div>`;
+    }
+
+    function renderSizeChart(containerId, dataObj, iconClass) {
+      renderSummaryChart(containerId, dataObj || {}, iconClass, sortSizeEntries(dataObj || {}));
+    }
+
+    function renderPersonSummary() { /* ยกเลิกการแสดงสรุปรายบุคคลในหน้าสรุปตามคำขอ */ }
+
+    async function adminLogin(event) {
+      event.preventDefault();
+      const password = document.getElementById('adminPassword').value;
+      const result = await gasRun('loginAdmin', password);
+      if (!result.success) return Swal.fire('เข้าสู่ระบบไม่สำเร็จ', result.message, 'error');
+      admin = { token: result.token, role: result.role };
+      document.getElementById('adminLoginSection').style.display = 'none';
+      document.getElementById('adminControlSection').style.display = 'block';
+      document.getElementById('adminRoleBadge').innerHTML = result.role === 'super' ? '<span class="badge badge-soft-success">แอดมินสูงสุด</span>' : '<span class="badge bg-secondary">แอดมินย่อย</span>';
+      fillSettingsForm();
+      renderAdminPanels();
+      Swal.fire('สำเร็จ', result.message, 'success');
+    }
+
+    function adminLogout() {
+      admin = { token: '', role: '' };
+      document.getElementById('adminLoginSection').style.display = 'flex';
+      document.getElementById('adminControlSection').style.display = 'none';
+      document.getElementById('adminPassword').value = '';
+    }
+
+
+    async function changeCurrentAdminPassword() {
+      const currentInput = document.getElementById('currentAdminPassword');
+      const newInput = document.getElementById('newAdminPassword');
+      const confirmInput = document.getElementById('confirmAdminPassword');
+      const currentPassword = (currentInput?.value || '').trim();
+      const newPassword = (newInput?.value || '').trim();
+      const confirmPassword = (confirmInput?.value || '').trim();
+
+      if (!admin.token) {
+        Swal.fire('กรุณาเข้าสู่ระบบ', 'ต้องเข้าสู่ระบบแอดมินก่อนเปลี่ยนรหัสผ่าน', 'warning');
+        return;
+      }
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกรหัสผ่านเดิม รหัสผ่านใหม่ และยืนยันรหัสผ่านใหม่ให้ครบถ้วน', 'warning');
+        return;
+      }
+      if (newPassword.length < 4) {
+        Swal.fire('รหัสสั้นเกินไป', 'กรุณากำหนดรหัสผ่านใหม่อย่างน้อย 4 ตัวอักษร', 'warning');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        Swal.fire('รหัสผ่านไม่ตรงกัน', 'กรุณากรอกรหัสผ่านใหม่และยืนยันรหัสผ่านใหม่ให้ตรงกัน', 'warning');
+        return;
+      }
+      if (currentPassword === newPassword) {
+        Swal.fire('รหัสผ่านซ้ำเดิม', 'กรุณากำหนดรหัสผ่านใหม่ให้แตกต่างจากรหัสผ่านเดิม', 'warning');
+        return;
+      }
+
+      const roleLabel = admin.role === 'super' ? 'แอดมินสูงสุด' : 'แอดมินย่อย';
+      const confirm = await Swal.fire({
+        title: `ยืนยันเปลี่ยนรหัส${roleLabel}?`,
+        text: 'หลังเปลี่ยนแล้ว การเข้าสู่ระบบครั้งต่อไปต้องใช้รหัสผ่านใหม่',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยันเปลี่ยนรหัส',
+        cancelButtonText: 'ยกเลิก'
+      });
+      if (!confirm.isConfirmed) return;
+
+      setButtonLoading('changeCurrentAdminPasswordButton', true, 'กำลังเปลี่ยนรหัส...');
+      try {
+        const result = await gasRun('updateCurrentAdminPassword', admin.token, currentPassword, newPassword);
+        if (result.success) {
+          [currentInput, newInput, confirmInput].forEach(input => { if (input) input.value = ''; });
+          if (result.settings) {
+            state.settings = result.settings;
+            state.systemOpen = result.systemOpen;
+            applySettings();
+            fillSettingsForm();
+          }
+          Swal.fire('สำเร็จ', result.message || 'เปลี่ยนรหัสผ่านแอดมินเรียบร้อยแล้ว', 'success');
+        } else {
+          Swal.fire('ไม่สำเร็จ', result.message || 'ไม่สามารถเปลี่ยนรหัสผ่านได้', 'error');
+        }
+      } finally {
+        setButtonLoading('changeCurrentAdminPasswordButton', false);
+      }
+    }
+
+    async function changeSubAdminPassword() {
+      const input = document.getElementById('settingSubAdminPassword');
+      const newPassword = (input?.value || '').trim();
+      if (admin.role !== 'super') {
+        Swal.fire('ไม่มีสิทธิ์เปลี่ยนรหัส', 'การเปลี่ยนรหัสแอดมินย่อยทำได้เฉพาะแอดมินสูงสุดเท่านั้น', 'warning');
+        return;
+      }
+      if (!newPassword) {
+        Swal.fire('ยังไม่ได้กรอกรหัสใหม่', 'กรุณากรอกรหัสผ่านแอดมินย่อยที่ต้องการเปลี่ยน', 'warning');
+        return;
+      }
+      if (newPassword.length < 4) {
+        Swal.fire('รหัสสั้นเกินไป', 'กรุณากำหนดรหัสแอดมินย่อยอย่างน้อย 4 ตัวอักษร', 'warning');
+        return;
+      }
+      const confirm = await Swal.fire({
+        title: 'ยืนยันเปลี่ยนรหัสแอดมินย่อย?',
+        text: 'หลังเปลี่ยนแล้ว แอดมินย่อยต้องใช้รหัสใหม่นี้ในการเข้าสู่ระบบ',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยันเปลี่ยนรหัส',
+        cancelButtonText: 'ยกเลิก'
+      });
+      if (!confirm.isConfirmed) return;
+      setButtonLoading('changeSubPasswordButton', true, 'กำลังเปลี่ยนรหัส...');
+      try {
+        const result = await gasRun('updateSubAdminPassword', admin.token, newPassword);
+        if (result.success) {
+          if (input) input.value = '';
+          if (result.settings) {
+            state.settings = result.settings;
+            applySettings();
+            fillSettingsForm();
+          }
+          Swal.fire('สำเร็จ', 'เปลี่ยนรหัสผ่านแอดมินย่อยเรียบร้อยแล้ว', 'success');
+        } else {
+          Swal.fire('ไม่สำเร็จ', result.message || 'ไม่สามารถเปลี่ยนรหัสผ่านได้', 'error');
+        }
+      } finally {
+        setButtonLoading('changeSubPasswordButton', false);
+      }
+    }
+
+    async function saveSettings(event) {
+      event.preventDefault();
+      const patch = {
+        systemName: document.getElementById('settingSystemName').value.trim(),
+        teamColorName: document.getElementById('settingTeamColorName').value.trim(),
+        academicYear: document.getElementById('settingAcademicYear').value.trim(),
+        schoolName: document.getElementById('settingSchoolName').value.trim(),
+        developerName: document.getElementById('settingDeveloperName').value.trim(),
+        theme: selectedTheme,
+        customPrimaryColor: document.getElementById('customPrimaryColorInput').value,
+        customSecondaryColor: document.getElementById('customSecondaryColorInput').value,
+        systemMode: document.getElementById('settingSystemMode').value,
+        manualOpen: document.getElementById('settingManualOpen').checked,
+        openAt: document.getElementById('settingOpenAt').value,
+        closeAt: document.getElementById('settingCloseAt').value,
+        allowUserEdits: document.getElementById('settingAllowUserEdits').checked
+      };
+      const newSubPassword = document.getElementById('settingSubAdminPassword').value.trim();
+      if (newSubPassword) {
+        if (admin.role !== 'super') {
+          Swal.fire('ไม่มีสิทธิ์เปลี่ยนรหัส', 'การเปลี่ยนรหัสแอดมินย่อยทำได้เฉพาะแอดมินสูงสุดเท่านั้น', 'warning');
+          return;
+        }
+        if (newSubPassword.length < 4) {
+          Swal.fire('รหัสสั้นเกินไป', 'กรุณากำหนดรหัสแอดมินย่อยอย่างน้อย 4 ตัวอักษร', 'warning');
+          return;
+        }
+        patch.subAdminPassword = newSubPassword;
+      }
+      setButtonLoading('saveSettingsButton', true, 'กำลังบันทึก...');
+      try {
+        const result = await gasRun('saveSystemSettings', admin.token, patch);
+        if (result.success) {
+          state.settings = result.settings || state.settings;
+          state.systemOpen = result.systemOpen;
+          applySettings();
+          fillSettingsForm();
+          const message = newSubPassword ? 'บันทึกการตั้งค่าและเปลี่ยนรหัสผ่านแอดมินย่อยเรียบร้อยแล้ว' : result.message;
+          await Swal.fire('สำเร็จ', message, 'success');
+        } else {
+          Swal.fire('ไม่สำเร็จ', result.message, 'error');
+        }
+      } finally {
+        setButtonLoading('saveSettingsButton', false);
+      }
+    }
+
+    async function uploadLogoFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const fileObj = await fileToDataUrl(file, { maxSize: 820, maxLength: 240000, qualityStart: .86, qualityMin: .42 });
+        const result = await gasRun('uploadLogo', admin.token, fileObj);
+        if (result.success) {
+          state.settings.logoUrl = result.logoUrl;
+          renderLogoPreview(result.logoUrl);
+          applySettings();
+          Swal.fire('สำเร็จ', result.message, 'success');
+        } else Swal.fire('ไม่สำเร็จ', result.message, 'error');
+      } finally {
+        event.target.value = '';
+      }
+    }
+
+    async function removeLogoFile() {
+      const confirm = await Swal.fire({ title: 'ลบโลโก้?', text: 'โลโก้หัวเว็บจะถูกนำออก', icon: 'warning', showCancelButton: true, confirmButtonText: 'ลบ', cancelButtonText: 'ยกเลิก' });
+      if (!confirm.isConfirmed) return;
+      const result = await gasRun('removeLogo', admin.token);
+      if (result.success) { await refreshData(); fillSettingsForm(); Swal.fire('สำเร็จ', result.message, 'success'); }
+      else Swal.fire('ไม่สำเร็จ', result.message, 'error');
+    }
+
+    async function addModel(event) {
+      event.preventDefault();
+      const file = document.getElementById('modelImageInput').files[0];
+      if (!file) return Swal.fire('กรุณาเลือกภาพ', 'ต้องมีภาพเสื้อก่อนอัปโหลด', 'warning');
+      if (file.size > 5 * 1024 * 1024) return Swal.fire('ไฟล์ใหญ่เกินไป', 'ภาพเสื้อต้องมีขนาดไม่เกิน 5 MB', 'warning');
+      setButtonLoading('uploadModelButton', true, 'กำลังอัปโหลด...');
+      try {
+        const data = { fileObj: await fileToDataUrl(file, { maxSize: 960, maxLength: 200000, qualityStart: .78, qualityMin: .42 }) };
+        const result = await gasRun('addShirtModel', admin.token, data);
+        if (result.success) {
+          document.getElementById('shirtModelForm').reset();
+          document.getElementById('modelUploadPreviewWrap').style.display = 'none';
+          applyModelsResult(result);
+          Swal.fire('สำเร็จ', result.message, 'success');
+        } else Swal.fire('ไม่สำเร็จ', result.message, 'error');
+      } catch (error) {
+        Swal.fire('ไม่สำเร็จ', error.message || String(error), 'error');
+      } finally {
+        setButtonLoading('uploadModelButton', false);
+      }
+    }
+
+    async function deleteModel(modelID) {
+      const confirm = await Swal.fire({ title: 'ลบภาพเสื้อ?', text: 'ระบบจะลบภาพนี้', icon: 'warning', showCancelButton: true, confirmButtonText: 'ลบ', cancelButtonText: 'ยกเลิก' });
+      if (!confirm.isConfirmed) return;
+      const response = await gasRun('deleteShirtModel', admin.token, modelID);
+      if (response.success) { applyModelsResult(response); Swal.fire('สำเร็จ', response.message, 'success'); }
+      else Swal.fire('ไม่สำเร็จ', response.message, 'error');
+    }
+
+    async function showModelImagePreview(event) {
+      const file = event.target.files[0];
+      const wrap = document.getElementById('modelUploadPreviewWrap');
+      const img = document.getElementById('modelUploadPreview');
+      const info = document.getElementById('modelUploadFileInfo');
+      if (!file) { wrap.style.display = 'none'; return; }
+      if (file.size > 5 * 1024 * 1024) {
+        event.target.value = '';
+        wrap.style.display = 'none';
+        return Swal.fire('ไฟล์ใหญ่เกินไป', 'ภาพเสื้อต้องมีขนาดไม่เกิน 5 MB', 'warning');
+      }
+      const url = URL.createObjectURL(file);
+      img.src = url;
+      info.textContent = `${file.name} | ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+      wrap.style.display = 'block';
+    }
+
+    function downloadTeacherSample() {
+      const csv = '\uFEFFชื่อ - สกุล\nนายตัวอย่าง ครูดี\nนางสาวตัวอย่าง ตั้งใจ';
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'teacher_name_sample.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function showTeacherFileName() {
+      const file = document.getElementById('teacherCsvInput').files[0];
+      document.getElementById('teacherFileNamePreview').textContent = file ? `เลือกไฟล์แล้ว: ${file.name}` : 'ยังไม่ได้เลือกไฟล์';
+    }
+
+    async function importTeachers() {
+      const input = document.getElementById('teacherCsvInput');
+      const file = input.files[0];
+      if (!file) return Swal.fire('กรุณาเลือกไฟล์', 'เลือกไฟล์รายชื่อครู CSV/TXT ก่อน แล้วกดปุ่มอัปโหลด', 'warning');
+      try {
+        setButtonLoading('uploadTeachersButton', true, 'กำลังอัปโหลด...');
+        const text = await readTextFile(file);
+        const result = await gasRun('importTeachersFromCsv', admin.token, text);
+        input.value = '';
+        showTeacherFileName();
+        if (result.success) { selectedTeacherIDs.clear(); applyTeachersResult(result); Swal.fire('สำเร็จ', result.message, 'success'); }
+        else Swal.fire('ไม่สำเร็จ', result.message, 'error');
+      } finally {
+        setButtonLoading('uploadTeachersButton', false);
+      }
+    }
+
+    async function addTeacher(event) {
+      event.preventDefault();
+      const input = document.getElementById('singleTeacherNameInput');
+      const result = await gasRun('addTeacher', admin.token, input.value.trim());
+      if (result.success) { input.value = ''; applyTeachersResult(result); Swal.fire('สำเร็จ', result.message, 'success'); }
+      else Swal.fire('ไม่สำเร็จ', result.message, 'error');
+    }
+
+    async function editTeacher(teacherID) {
+      const teacher = state.teachers.find(item => item.teacherID === teacherID);
+      if (!teacher) return;
+      const result = await Swal.fire({ title: 'แก้ไขรายชื่อครู', input: 'text', inputValue: teacher.fullName, showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก' });
+      if (!result.isConfirmed) return;
+      const response = await gasRun('updateTeacher', admin.token, teacherID, result.value);
+      if (response.success) { applyTeachersResult(response); Swal.fire('สำเร็จ', response.message, 'success'); }
+      else Swal.fire('ไม่สำเร็จ', response.message, 'error');
+    }
+
+    async function deleteTeacher(teacherID) {
+      const confirm = await Swal.fire({ title: 'ลบรายชื่อ?', icon: 'warning', showCancelButton: true, confirmButtonText: 'ลบ', cancelButtonText: 'ยกเลิก' });
+      if (!confirm.isConfirmed) return;
+      const response = await gasRun('deleteTeacher', admin.token, teacherID);
+      if (response.success) { selectedTeacherIDs.delete(teacherID); applyTeachersResult(response); Swal.fire('สำเร็จ', response.message, 'success'); }
+      else Swal.fire('ไม่สำเร็จ', response.message, 'error');
+    }
+
+    function updateTeacherSelection(teacherID, checked) {
+      if (!teacherID) return;
+      if (checked) selectedTeacherIDs.add(teacherID);
+      else selectedTeacherIDs.delete(teacherID);
+      syncTeacherSelectionUi();
+    }
+
+    function setAllTeacherSelections(checked) {
+      selectedTeacherIDs.clear();
+      if (checked) (state.teachers || []).forEach(t => selectedTeacherIDs.add(t.teacherID));
+      renderTeachersTable();
+    }
+
+    function toggleAllTeacherSelections() {
+      const teachers = state.teachers || [];
+      const shouldSelectAll = teachers.length > 0 && selectedTeacherIDs.size !== teachers.length;
+      setAllTeacherSelections(shouldSelectAll);
+    }
+
+    async function deleteSelectedTeachers() {
+      const ids = Array.from(selectedTeacherIDs);
+      if (ids.length === 0) return Swal.fire('ยังไม่ได้เลือก', 'กรุณาเลือกรายชื่อครูที่ต้องการลบ', 'warning');
+      const confirm = await Swal.fire({ title: `ลบรายชื่อที่เลือก ${ids.length} รายชื่อ?`, text: 'การลบนี้จะลบเฉพาะรายชื่อครู ไม่ลบรายการสั่งซื้อเดิม', icon: 'warning', showCancelButton: true, confirmButtonText: 'ลบที่เลือก', cancelButtonText: 'ยกเลิก' });
+      if (!confirm.isConfirmed) return;
+      const response = await gasRun('deleteTeachers', admin.token, ids);
+      if (response.success) { selectedTeacherIDs.clear(); applyTeachersResult(response); Swal.fire('สำเร็จ', response.message, 'success'); }
+      else Swal.fire('ไม่สำเร็จ', response.message, 'error');
+    }
+
+    function syncTeacherSelectionUi() {
+      const teachers = state.teachers || [];
+      const allBox = document.getElementById('teacherSelectAllCheckbox');
+      if (allBox) {
+        allBox.checked = teachers.length > 0 && selectedTeacherIDs.size === teachers.length;
+        allBox.indeterminate = selectedTeacherIDs.size > 0 && selectedTeacherIDs.size < teachers.length;
+      }
+      const button = document.getElementById('selectAllTeachersButton');
+      if (button) {
+        button.innerHTML = (teachers.length > 0 && selectedTeacherIDs.size === teachers.length) ? '<i class="fi fi-sr-cross-circle"></i> ยกเลิกทั้งหมด' : '<i class="fi fi-sr-list-check"></i> เลือกทั้งหมด';
+      }
+      document.querySelectorAll('#teachersTableBody tr').forEach(row => {
+        const box = row.querySelector('.teacher-select-checkbox');
+        if (box) row.classList.toggle('teacher-row-selected', box.checked);
+      });
+    }
+
+    function getActiveAdminPaneTarget() {
+      return document.querySelector('#adminInnerTab .nav-link.active')?.getAttribute('data-bs-target') || '#admin-orders-pane';
+    }
+
+    function renderActiveAdminPane(target = getActiveAdminPaneTarget()) {
+      if (!admin.token) return;
+      if (target === '#admin-orders-pane') renderAdminOrders();
+      else if (target === '#admin-models-pane') renderModelGrids();
+      else if (target === '#admin-teachers-pane') renderTeachersTable();
+      else if (target === '#admin-settings-pane') fillSettingsForm();
+    }
+
+    function renderAdminPanels() {
+      renderActiveAdminPane();
+    }
+
+    function renderTeachersTable() {
+      const tbody = document.getElementById('teachersTableBody');
+      const teachers = state.teachers || [];
+      selectedTeacherIDs = new Set(Array.from(selectedTeacherIDs).filter(id => teachers.some(t => t.teacherID === id)));
+      if (teachers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4">ยังไม่มีรายชื่อครู</td></tr>';
+        syncTeacherSelectionUi();
+        return;
+      }
+      tbody.innerHTML = teachers.map((teacher, index) => {
+        const checked = selectedTeacherIDs.has(teacher.teacherID) ? 'checked' : '';
+        return `<tr class="${checked ? 'teacher-row-selected' : ''}"><td data-label="เลือก" class="text-center"><input class="form-check-input teacher-select-checkbox" type="checkbox" data-teacher-id="${escapeAttr(teacher.teacherID)}" ${checked} aria-label="เลือก ${escapeAttr(teacher.fullName)}"></td><td data-label="ลำดับ" class="teacher-index-cell">${index + 1}</td><td data-label="ชื่อ" class="teacher-name-cell">${escapeHtml(teacher.fullName)}</td><td data-label="จัดการ"><div class="d-flex gap-2 justify-content-center teacher-action-buttons"><button class="btn btn-outline-theme btn-sm" onclick="editTeacher('${teacher.teacherID}')" title="แก้ไข"><i class="fi fi-sr-pencil"></i></button><button class="btn btn-outline-danger btn-sm rounded-pill" onclick="deleteTeacher('${teacher.teacherID}')" title="ลบ"><i class="fi fi-sr-trash"></i></button></div></td></tr>`;
+      }).join('');
+      syncTeacherSelectionUi();
+    }
+
+    function renderAdminOrders() {
+      const orders = state.orders || [];
+      const teachers = state.teachers || [];
+      const orderedNames = new Set(orders.map(o => normalizeName(o.fullName)));
+      const orderedTeacherCount = orderedNames.size;
+      const orderedTeachersFromList = teachers.filter(t => orderedNames.has(normalizeName(t.fullName))).length;
+      const notOrdered = Math.max(teachers.length - orderedTeachersFromList, 0);
+      const summary = state.summary || {};
+      document.getElementById('adminOrderCards').innerHTML = `
+        <div class="col-md-3"><div class="summary-card"><div class="icon"><i class="fi fi-sr-users"></i></div><div class="text-muted">ครูทั้งหมด</div><div class="display-6 fw-bold main-color-text">${teachers.length}</div></div></div>
+        <div class="col-md-3"><div class="summary-card"><div class="icon"><i class="fi fi-sr-check-circle"></i></div><div class="text-muted">สั่งแล้ว</div><div class="display-6 fw-bold text-success">${orderedTeacherCount}</div></div></div>
+        <div class="col-md-3"><div class="summary-card"><div class="icon"><i class="fi fi-sr-cross-circle"></i></div><div class="text-muted">ยังไม่ได้สั่ง</div><div class="display-6 fw-bold text-danger">${notOrdered}</div></div></div>
+        <div class="col-md-3"><div class="summary-card"><div class="icon"><i class="fi fi-sr-tshirt"></i></div><div class="text-muted">จำนวนเสื้อรวม</div><div class="display-6 fw-bold main-color-text">${summary.totalQuantity || 0}</div></div></div>`;
+
+      renderTeacherOrderStatus();
+      renderAdminOrdersTable();
+    }
+
+    function renderTeacherOrderStatus() {
+      const tbody = document.getElementById('teacherOrderStatusBody');
+      const teachers = state.teachers || [];
+      const orders = state.orders || [];
+      if (teachers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4">ยังไม่มีรายชื่อครูสำหรับตรวจสอบสถานะ</td></tr>';
+        return;
+      }
+      tbody.innerHTML = teachers.map((teacher, index) => {
+        const teacherOrders = orders.filter(o => normalizeName(o.fullName) === normalizeName(teacher.fullName));
+        const details = teacherOrders.length
+          ? teacherOrders.map(o => `<span class="order-chip"><i class="fi fi-sr-tshirt"></i> ${escapeHtml(o.shirtStyle)} • ไซต์ ${escapeHtml(o.shirtSize)} • ${o.quantity} ตัว</span>`).join(' ')
+          : '<span class="text-muted">ยังไม่มีข้อมูลการสั่งซื้อ</span>';
+        return `<tr><td data-label="ลำดับ">${index + 1}</td><td data-label="ชื่อ">${escapeHtml(teacher.fullName)}</td><td data-label="สถานะ">${teacherOrders.length ? '<span class="badge badge-soft-success">สั่งแล้ว</span>' : '<span class="badge badge-soft-danger">ยังไม่ได้สั่ง</span>'}</td><td data-label="ข้อมูล">${details}</td></tr>`;
+      }).join('');
+    }
+
+    function renderAdminOrdersTable() {
+      const tbody = document.getElementById('adminOrdersTableBody');
+      const groups = groupOrdersByPerson(state.orders || []);
+      const validKeys = new Set(groups.map(group => group.key));
+      selectedOrderPersonKeys = new Set(Array.from(selectedOrderPersonKeys).filter(key => validKeys.has(key)));
+      updateOrderSelectAllState(groups);
+      if (groups.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4">ยังไม่มีรายการสั่งซื้อ</td></tr>';
+        return;
+      }
+      tbody.innerHTML = groups.map((group, index) => {
+        const checked = selectedOrderPersonKeys.has(group.key) ? 'checked' : '';
+        return `<tr class="${checked ? 'order-person-row-selected' : ''}">
+          <td data-label="เลือก" class="text-center"><input class="form-check-input order-person-select-checkbox" type="checkbox" data-person-key="${escapeAttr(group.key)}" ${checked} aria-label="เลือก ${escapeAttr(group.fullName)}"></td>
+          <td data-label="ลำดับ">${index + 1}</td>
+          <td data-label="ชื่อ"><div class="grouped-order-name"><i class="fi fi-sr-user"></i> ${escapeHtml(group.fullName)}</div></td>
+          <td data-label="รายละเอียด">${groupedOrderDetailsHtml(group, false, true)}</td>
+          <td data-label="รวม"><span class="group-total-badge"><i class="fi fi-sr-shopping-cart"></i> ${Number(group.total || 0).toLocaleString('th-TH')} ตัว</span></td>
+          <td data-label="จัดการ">${groupedOrderActionsHtml(group, true)}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function updateOrderPersonSelection(personKey, checked) {
+      if (!personKey) return;
+      if (checked) selectedOrderPersonKeys.add(personKey);
+      else selectedOrderPersonKeys.delete(personKey);
+      renderAdminOrdersTable();
+    }
+
+    function setAllOrderPersonSelections(checked) {
+      const groups = groupOrdersByPerson(state.orders || []);
+      selectedOrderPersonKeys = checked ? new Set(groups.map(group => group.key)) : new Set();
+      renderAdminOrdersTable();
+    }
+
+    function toggleAllOrderPersonSelections() {
+      const groups = groupOrdersByPerson(state.orders || []);
+      const allSelected = groups.length > 0 && groups.every(group => selectedOrderPersonKeys.has(group.key));
+      setAllOrderPersonSelections(!allSelected);
+    }
+
+    function updateOrderSelectAllState(groups = groupOrdersByPerson(state.orders || [])) {
+      const checkbox = document.getElementById('orderPeopleSelectAllCheckbox');
+      if (!checkbox) return;
+      const total = groups.length;
+      const selected = groups.filter(group => selectedOrderPersonKeys.has(group.key)).length;
+      checkbox.checked = total > 0 && selected === total;
+      checkbox.indeterminate = selected > 0 && selected < total;
+    }
+
+    async function deleteSelectedOrderGroups() {
+      const groups = groupOrdersByPerson(state.orders || []).filter(group => selectedOrderPersonKeys.has(group.key));
+      if (!groups.length) {
+        Swal.fire('ยังไม่ได้เลือกรายการ', 'กรุณาเลือกชื่อผู้สั่งซื้อที่ต้องการลบก่อน', 'info');
+        return;
+      }
+      const orderIDs = groups.flatMap(group => (group.orders || []).map(order => order.orderID).filter(Boolean));
+      const totalItems = groups.reduce((sum, group) => sum + Number(group.total || 0), 0);
+      const confirm = await Swal.fire({
+        title: 'ลบรายการที่เลือก?',
+        html: `ต้องการลบข้อมูลของ <b>${groups.length}</b> คน รวม <b>${totalItems.toLocaleString('th-TH')}</b> ตัว ใช่หรือไม่`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'ลบรายการ',
+        cancelButtonText: 'ยกเลิก'
+      });
+      if (!confirm.isConfirmed) return;
+      const response = await gasRun('deleteOrders', admin.token, orderIDs);
+      if (response.success) {
+        selectedOrderPersonKeys.clear();
+        if (response.orders || response.data || response.summary) applyOrdersResult(response); else await refreshOrdersOnly();
+        Swal.fire('สำเร็จ', response.message, 'success');
+      } else {
+        Swal.fire('ไม่สำเร็จ', response.message || 'ลบข้อมูลไม่สำเร็จ', 'error');
+      }
+    }
+
+    function openEditOrder(orderID, isAdmin) {
+      if (!isAdmin && !(state.settings && (state.settings.allowUserEdits === true || state.settings.allowUserEdits === 'true'))) {
+        Swal.fire('ปิดการแก้ไข', 'ขณะนี้ผู้ดูแลระบบปิดสิทธิ์การแก้ไขรายการ หากต้องการแก้ไขจำนวน ไซส์ หรือรายละเอียดเสื้อ กรุณาติดต่อแอดมิน', 'info');
+        return;
+      }
+      const order = state.orders.find(item => item.orderID === orderID);
+      if (!order) return;
+      editModeAdmin = isAdmin;
+      document.getElementById('editOrderID').value = order.orderID;
+      document.getElementById('editFullName').value = order.fullName;
+      document.getElementById('editFullName').readOnly = !isAdmin;
+      document.getElementById('editModelName').value = 'แบบหลัก';
+      document.getElementById('editShirtStyle').value = order.shirtStyle || 'ผู้ชาย';
+      populateSizeSelect('editShirtSize', order.shirtStyle || 'ผู้ชาย', order.shirtSize);
+      document.getElementById('editQuantity').value = order.quantity || 1;
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('editOrderModal')).show();
+    }
+
+    async function saveOrderChanges() {
+      const data = {
+        orderID: document.getElementById('editOrderID').value,
+        fullName: document.getElementById('editFullName').value.trim(),
+        modelName: 'แบบหลัก',
+        shirtStyle: document.getElementById('editShirtStyle').value,
+        shirtSize: document.getElementById('editShirtSize').value,
+        quantity: Number(document.getElementById('editQuantity').value || 1)
+      };
+      const payload = editModeAdmin ? { token: admin.token, data } : { data };
+      const result = await gasRun('updateOrder', payload);
+      if (result.success) {
+        bootstrap.Modal.getInstance(document.getElementById('editOrderModal')).hide();
+        if (result.orders || result.data || result.summary) applyOrdersResult(result); else await refreshOrdersOnly();
+        Swal.fire('สำเร็จ', result.message, 'success');
+      } else Swal.fire('ไม่สำเร็จ', result.message, 'error');
+    }
+
+    async function removeOrder(orderID) {
+      const confirm = await Swal.fire({ title: 'ลบรายการสั่งซื้อ?', icon: 'warning', showCancelButton: true, confirmButtonText: 'ลบ', cancelButtonText: 'ยกเลิก' });
+      if (!confirm.isConfirmed) return;
+      const result = await gasRun('deleteOrder', admin.token, orderID);
+      if (result.success) { if (result.orders || result.data || result.summary) applyOrdersResult(result); else await refreshOrdersOnly(); Swal.fire('สำเร็จ', result.message, 'success'); }
+      else Swal.fire('ไม่สำเร็จ', result.message, 'error');
+    }
+
+    function buildStickerItems(orders) {
+      const personMap = new Map();
+      (orders || []).forEach(order => {
+        const personKey = normalizeName(order.fullName) || `unknown-${order.orderID || Math.random()}`;
+        if (!personMap.has(personKey)) personMap.set(personKey, { fullName: order.fullName || 'ไม่ระบุชื่อ', detailMap: new Map() });
+        const person = personMap.get(personKey);
+        const style = order.shirtStyle || '-';
+        const size = order.shirtSize || '-';
+        const detailKey = `${style}__${size}`;
+        if (!person.detailMap.has(detailKey)) person.detailMap.set(detailKey, { shirtStyle: style, shirtSize: size, quantity: 0 });
+        person.detailMap.get(detailKey).quantity += Math.max(0, Number(order.quantity || 0));
+      });
+
+      const rows = [];
+      Array.from(personMap.values())
+        .sort((a, b) => String(a.fullName || '').localeCompare(String(b.fullName || ''), 'th'))
+        .forEach(person => {
+          Array.from(person.detailMap.values()).sort((a, b) => {
+            const styleCompare = String(a.shirtStyle || '').localeCompare(String(b.shirtStyle || ''), 'th');
+            return styleCompare || String(a.shirtSize || '').localeCompare(String(b.shirtSize || ''), 'th', { numeric: true });
+          }).forEach(item => {
+            const totalCopies = Math.max(1, Number(item.quantity || 0));
+            for (let copyNo = 1; copyNo <= totalCopies; copyNo += 1) {
+              rows.push({
+                fullName: person.fullName,
+                shirtStyle: item.shirtStyle,
+                shirtSize: item.shirtSize,
+                quantity: 1,
+                copyNo,
+                copyTotal: totalCopies
+              });
+            }
+          });
+        });
+      return rows;
+    }
+
+    function printHtmlInline(printHtml, label = 'เอกสารสำหรับพิมพ์') {
+      const oldFrame = document.getElementById('inlinePrintFrame');
+      if (oldFrame) oldFrame.remove();
+
+      const frame = document.createElement('iframe');
+      frame.id = 'inlinePrintFrame';
+      frame.title = label;
+      frame.setAttribute('aria-hidden', 'true');
+      frame.style.position = 'fixed';
+      frame.style.right = '0';
+      frame.style.bottom = '0';
+      frame.style.width = '1px';
+      frame.style.height = '1px';
+      frame.style.border = '0';
+      frame.style.opacity = '0';
+      frame.style.pointerEvents = 'none';
+      document.body.appendChild(frame);
+
+      const frameWindow = frame.contentWindow;
+      const frameDoc = frameWindow.document;
+      frameDoc.open();
+      frameDoc.write(printHtml);
+      frameDoc.close();
+
+      const cleanup = () => setTimeout(() => {
+        const target = document.getElementById('inlinePrintFrame');
+        if (target) target.remove();
+      }, 30000);
+
+      const runPrint = () => {
+        try {
+          frameWindow.focus();
+          frameWindow.print();
+          cleanup();
+        } catch (error) {
+          console.error(error);
+          cleanup();
+          Swal.fire('สั่งพิมพ์ไม่ได้', 'เบราว์เซอร์ไม่อนุญาตให้เรียกหน้าพิมพ์อัตโนมัติ กรุณาลองกดพิมพ์ใหม่อีกครั้ง', 'warning');
+        }
+      };
+
+      setTimeout(() => {
+        if (frameDoc.fonts && frameDoc.fonts.ready) {
+          frameDoc.fonts.ready.then(() => setTimeout(runPrint, 120)).catch(runPrint);
+        } else {
+          runPrint();
+        }
+      }, 180);
+    }
+
+    function printStickers() {
+      const stickerRows = buildStickerItems(state.orders || []);
+      const titleText = `${state.settings.systemName || ''} ${state.settings.teamColorName || ''} ${state.settings.academicYear || ''}`.trim();
+      const printHtml = `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>พิมพ์สติ๊กเกอร์ผู้สั่งซื้อ</title>
+        <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+          *{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;font-family:'Kanit',Arial,sans-serif!important}
+          @page{size:A4 portrait;margin:7mm}
+          body{font-family:'Kanit',Arial,sans-serif!important;margin:0;padding:0;color:#111;font-weight:400;background:#fff;line-height:1.25}
+          .sheet-title{text-align:center;margin:0 0 2mm;font-size:17px;font-weight:600;color:#111;line-height:1.35}
+          .sheet-meta{text-align:center;font-size:10.5px;margin:0 0 4mm;color:#555;font-weight:300}
+          .sticker-sheet{display:grid;grid-template-columns:1fr;gap:0;border:1px dashed #777;border-bottom:0;background:#fff}
+          .sticker-row{display:grid;grid-template-columns:2fr .78fr .58fr .62fr;align-items:stretch;min-height:17mm;border-bottom:1px dashed #777;background:#fff;break-inside:avoid;overflow:hidden;margin:0;border-radius:0}
+          .cell{padding:2mm 3mm;border-right:1px dashed #aaa;min-width:0;display:flex;flex-direction:column;justify-content:center}
+          .cell:last-child{border-right:0;text-align:center;align-items:center}
+          .label{display:block;font-size:8px;color:#777;font-weight:300;margin-bottom:1px;letter-spacing:.01em}
+          .name{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111;line-height:1.15}
+          .value{font-size:12px;font-weight:500;color:#111}.piece{font-size:12px;font-weight:600;color:#111}.piece small{display:block;font-size:8.2px;font-weight:300;color:#666;margin-top:1px}
+          .empty{padding:18px;text-align:center;border:1px dashed #999;border-radius:10px}
+          @media(max-width:700px){body{padding:8px}.sticker-row{grid-template-columns:1fr .78fr .58fr .62fr}.cell{padding:6px}.name{font-size:14px}.value,.piece{font-size:10.5px}.label{font-size:7.5px}}
+          @media print{.sticker-sheet{gap:0;border-color:#777}.sticker-row{min-height:17mm;border-radius:0}.name{font-size:16px}.value,.piece{font-size:10.8px}.label{font-size:7.8px}}
+        </style></head><body>
+        <h2 class="sheet-title">สติ๊กเกอร์แยกถุงเสื้อ</h2>
+        <p class="sheet-meta">${escapeHtml(titleText)} | พิมพ์เมื่อ ${formatDate(new Date().toISOString())}</p>
+        ${stickerRows.length ? `<div class="sticker-sheet">${stickerRows.map(item => `<div class="sticker-row"><div class="cell"><span class="label">ชื่อผู้สั่งซื้อ</span><div class="name">${escapeHtml(item.fullName)}</div></div><div class="cell"><span class="label">ประเภท</span><div class="value">${escapeHtml(item.shirtStyle)}</div></div><div class="cell"><span class="label">ไซส์</span><div class="value">${escapeHtml(item.shirtSize)}</div></div><div class="cell"><span class="label">จำนวน</span><div class="piece">1 ตัว<small>ใบที่ ${item.copyNo}/${item.copyTotal}</small></div></div></div>`).join('')}</div>` : '<div class="empty">ไม่มีข้อมูลสำหรับพิมพ์สติ๊กเกอร์</div>'}
+        </body></html>`;
+      printHtmlInline(printHtml, 'พิมพ์สติ๊กเกอร์');
+    }
+
+    function printOrders() {
+      const orders = state.orders || [];
+      const summary = buildClientOrderSummary(orders);
+      const titleText = `${state.settings.systemName || ''} ${state.settings.teamColorName || ''}`.trim() || 'รายงานสรุปการสั่งซื้อ';
+      const academicYear = state.settings.academicYear ? `ปีการศึกษา ${state.settings.academicYear}` : '';
+      const schoolName = state.settings.schoolName || '';
+      const developerName = state.settings.developerName || '';
+      const logoUrl = state.settings.logoUrl || '';
+      const byStyle = summary.byStyle || {};
+      const maleSizes = (summary.bySize || {})['ผู้ชาย'] || {};
+      const femaleSizes = (summary.bySize || {})['ผู้หญิง'] || {};
+      const groupedPeople = groupOrdersByPerson(orders);
+      const totalPeople = groupedPeople.length;
+      const printedAt = formatDate(new Date().toISOString());
+      const latestOrderText = orders.length ? formatDate(orders.slice().sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))[0].timestamp) : '-';
+      const groupedRows = printGroupedOrdersRowsHtml(orders);
+      const logoHtml = logoUrl ? `<img class="doc-logo" src="${escapeHtml(logoUrl)}" alt="logo">` : `<div class="doc-logo doc-logo-fallback">PDF</div>`;
+
+      const printHtml = `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>รายงานสรุปการสั่งซื้อ PDF</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        <style>
+          @page{size:A4 portrait;margin:8mm 7mm 9mm}
+          *{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;font-family:'Kanit','TH Sarabun New',Arial,sans-serif!important}
+          html,body{margin:0;padding:0;background:#eef0f4;color:#111;font-family:'Kanit','TH Sarabun New',Arial,sans-serif!important;font-weight:400;line-height:1.35}
+          body{padding:10px}.print-page{width:196mm;max-width:196mm;margin:0 auto;background:#fff;border-radius:18px;padding:8mm;box-shadow:0 16px 42px rgba(0,0,0,.10);overflow:hidden}
+          .doc-head{display:grid;grid-template-columns:18mm 1fr auto;gap:4mm;align-items:center;border:1.7px solid #111;border-radius:18px;padding:5mm 5mm;background:linear-gradient(135deg,#ffe600 0%,#fff6a6 28%,#fff 62%,#fff 100%);position:relative;overflow:hidden;margin-bottom:4mm}
+          .doc-head:after{content:'';position:absolute;right:-18mm;top:-28mm;width:64mm;height:64mm;border-radius:50%;background:rgba(17,17,17,.065)}
+          .doc-logo{width:18mm;height:18mm;border-radius:14px;object-fit:cover;background:#fff;border:1.6px solid #111;box-shadow:0 3px 0 #111;position:relative;z-index:1}.doc-logo-fallback{display:grid;place-items:center;font-size:12px;font-weight:800;color:#111;background:#fff}
+          .doc-title-wrap{position:relative;z-index:1;min-width:0}.doc-kicker{font-size:9.4px;font-weight:600;letter-spacing:.04em;color:#222;text-transform:uppercase;margin-bottom:1px}.doc-title{font-size:20px;font-weight:800;margin:0;color:#111;line-height:1.22;letter-spacing:.005em}.doc-subtitle{font-size:10.4px;margin:2px 0 0;color:#333;font-weight:400}
+          .doc-date-box{position:relative;z-index:1;text-align:right;border:1px solid rgba(17,17,17,.26);border-radius:14px;background:rgba(255,255,255,.86);padding:2.6mm 3mm;min-width:38mm}.doc-date-box small{display:block;font-size:8.1px;color:#666}.doc-date-box strong{display:block;font-size:10.2px;line-height:1.26;color:#111;font-weight:700}
+          .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:2.2mm;margin-bottom:4mm}.stat-box{border:1.25px solid #111;border-radius:15px;background:#fff;padding:2.7mm 2.4mm;min-height:19mm;box-shadow:0 2px 0 #111;display:flex;flex-direction:column;justify-content:center;text-align:center}.stat-box .stat-value{font-size:18px;line-height:1.05;font-weight:800;color:#111}.stat-box .stat-label{font-size:8.7px;color:#555;font-weight:500;margin-top:1.4mm}.stat-box.highlight{background:#fff7c7}
+          .section-title{display:flex;align-items:center;gap:2.2mm;font-size:12.2px;font-weight:800;margin:4.3mm 0 2.1mm;color:#111;line-height:1.25}.section-title:before{content:'';width:4.2mm;height:4.2mm;border:1.4px solid #111;border-radius:1.3mm;background:#ffe600;box-shadow:1.4mm 1.4mm 0 #111;flex:none}
+          .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5mm;margin-bottom:2.5mm;align-items:start}.summary-grid>div{min-width:0}
+          table.print-table{width:100%;border-collapse:separate;border-spacing:0;border:1.2px solid #111;border-radius:12px;overflow:hidden;background:#fff;table-layout:fixed;margin:0 0 2.2mm}.print-table th,.print-table td{border-right:1px solid #d6d2c1;border-bottom:1px solid #d6d2c1;padding:2.35mm 2.3mm;font-size:9.3px;vertical-align:top;color:#111;background:#fff;word-break:break-word;font-weight:400}.print-table th:last-child,.print-table td:last-child{border-right:0}.print-table tbody tr:last-child td,.print-table tfoot tr:last-child td{border-bottom:0}.print-table th{background:#111;color:#fff;font-weight:700;text-align:center}.print-table tbody tr:nth-child(even) td{background:#fffdf2}.print-table tfoot td{background:#ffe96b!important;font-weight:800!important;color:#111!important}
+          .summary-caption{background:#ffe600!important;color:#111!important;text-align:left!important;font-size:10.1px;padding:2.4mm 2.6mm!important;font-weight:800!important;border-bottom:1.25px solid #111!important}.summary-caption .summary-icon{display:inline-grid;place-items:center;width:4.2mm;height:4.2mm;margin-right:1.5mm;border-radius:999px;background:#111;color:#ffe600;font-size:7.2px;vertical-align:middle}.summary-table th{background:#111!important;color:#fff!important}.summary-table td:last-child{font-weight:700;text-align:right;white-space:nowrap}
+          .order-table{font-size:9px}.order-table thead th{font-size:9px}.row-number{text-align:center;font-weight:800;background:#fff7c7!important}.person-name{display:block;font-weight:800;font-size:9.6px;line-height:1.25;color:#111}.person-sub{display:block;font-size:7.7px;color:#666;margin-top:.6mm}.person-total{text-align:center;font-weight:800;white-space:nowrap;color:#111}.latest-time{font-size:8.1px;line-height:1.25;color:#333;text-align:center;white-space:normal}.detail-list{display:grid;gap:1.1mm}.detail-line{display:grid;grid-template-columns:auto 1fr auto;gap:1.5mm;align-items:center;border:1px solid #eadf9a;border-radius:9px;background:#fffef6;padding:1.25mm 1.6mm;font-size:8.45px;line-height:1.22;break-inside:avoid}.detail-index{display:inline-grid;place-items:center;width:5mm;height:5mm;border-radius:999px;background:#111;color:#fff;font-weight:700;font-size:7.2px}.detail-main strong{font-weight:800}.detail-time{font-size:7.4px;color:#555;white-space:nowrap}.qty-pill{display:inline-flex;align-items:center;justify-content:center;border:1px solid #111;border-radius:999px;background:#ffe600;padding:.35mm 1.6mm;font-weight:800;white-space:nowrap;color:#111}
+          .grand-total{margin-top:3mm;border:1.7px solid #111;border-radius:15px;padding:3mm 4mm;text-align:right;font-size:13px;font-weight:800;background:linear-gradient(135deg,#fff3a0,#ffe600);color:#111;box-shadow:0 2px 0 #111}.print-footer{display:flex;justify-content:space-between;gap:8px;margin-top:3mm;padding-top:2mm;border-top:1px solid #ddd;color:#555;font-size:8px}.text-center{text-align:center}.text-right{text-align:right}.nowrap{white-space:nowrap}.empty-row{padding:8mm!important;text-align:center;color:#777}
+          @media(max-width:700px){body{padding:0;background:#fff}.print-page{width:100%;max-width:100%;padding:10px;border-radius:0;box-shadow:none}.doc-head{grid-template-columns:14mm 1fr;gap:3mm}.doc-date-box{grid-column:1/-1;text-align:left}.doc-logo{width:14mm;height:14mm}.doc-title{font-size:16px}.summary-grid,.stat-strip{grid-template-columns:1fr 1fr}.print-table th,.print-table td{font-size:8.5px;padding:5px}.detail-line{display:block}.detail-index,.qty-pill{margin-right:4px}.detail-time{display:block;margin-top:2px}}
+          @media print{html,body{background:#fff!important;padding:0!important}.print-page{width:196mm;max-width:196mm;margin:0;padding:0;box-shadow:none;border-radius:0}.doc-head,.stat-strip,.summary-grid,table.print-table,.grand-total{break-inside:avoid;page-break-inside:avoid}.summary-grid{grid-template-columns:1fr 1fr!important}.order-table{page-break-inside:auto}thead{display:table-header-group}tfoot{display:table-footer-group}tr{page-break-inside:avoid;page-break-after:auto}.print-footer{position:relative}}
+        </style></head><body><div class="print-page">
+        <div class="doc-head">${logoHtml}<div class="doc-title-wrap"><div class="doc-kicker">A4 PDF REPORT</div><h1 class="doc-title">${escapeHtml(titleText)}</h1><p class="doc-subtitle">${escapeHtml([academicYear, schoolName].filter(Boolean).join(' • ')) || 'รายการสั่งซื้อและสรุปจำนวน'}</p></div><div class="doc-date-box"><small>พิมพ์เมื่อ</small><strong>${printedAt}</strong><small>รายการล่าสุด</small><strong>${escapeHtml(latestOrderText)}</strong></div></div>
+        <div class="stat-strip">
+          <div class="stat-box"><div class="stat-value">${Number(totalPeople || 0).toLocaleString('th-TH')}</div><div class="stat-label">ผู้สั่งซื้อแล้ว</div></div>
+          <div class="stat-box"><div class="stat-value">${Number(orders.length || 0).toLocaleString('th-TH')}</div><div class="stat-label">รายการสั่งซื้อ</div></div>
+          <div class="stat-box highlight"><div class="stat-value">${Number(summary.totalQuantity || 0).toLocaleString('th-TH')}</div><div class="stat-label">จำนวนเสื้อรวม</div></div>
+          <div class="stat-box"><div class="stat-value">${Number((byStyle['ผู้ชาย'] || 0) + (byStyle['ผู้หญิง'] || 0)).toLocaleString('th-TH')}</div><div class="stat-label">รวมตามประเภท</div></div>
+        </div>
+        <div class="section-title">สรุปข้อมูลสำหรับจัดซื้อ / ตรวจนับ</div>
+        <div class="summary-grid">
+          <div>${summaryTableHtml('สรุปประเภทเสื้อ', byStyle, 'T')}</div>
+          <div>${summaryTableHtml('สรุปจำนวนรวม', { 'ผู้สั่งซื้อแล้ว': totalPeople || 0, 'รายการสั่งซื้อ': orders.length || 0, 'รวมเสื้อทั้งหมด': summary.totalQuantity || 0 }, 'Σ')}</div>
+        </div>
+        <div class="summary-grid">
+          <div>${summaryTableHtml('สรุปไซส์ผู้ชาย', maleSizes, 'M')}</div>
+          <div>${summaryTableHtml('สรุปไซส์ผู้หญิง', femaleSizes, 'F')}</div>
+        </div>
+        <div class="section-title">ตารางรายการสั่งซื้อทั้งหมด</div>
+        <table class="print-table order-table"><thead><tr><th style="width:9mm">ลำดับ</th><th style="width:42mm">ชื่อ - สกุล</th><th>รายละเอียดการสั่งซื้อ</th><th style="width:25mm">สั่งล่าสุด</th><th style="width:18mm">รวม</th></tr></thead><tbody>
+        ${groupedRows || '<tr><td colspan="5" class="empty-row">ไม่มีข้อมูลรายการสั่งซื้อ</td></tr>'}
+        </tbody></table>
+        <div class="grand-total">รวมจำนวนเสื้อทั้งหมด ${Number(summary.totalQuantity || 0).toLocaleString('th-TH')} ตัว</div>
+        <div class="print-footer"><span>${escapeHtml(developerName ? `พัฒนาโดย ${developerName}` : '')}</span><span>ใช้ฟอนต์ Kanit • จัดรูปแบบสำหรับ A4 • เลือก Save as PDF จากหน้าต่างพิมพ์</span></div>
+        </div></body></html>`;
+      printHtmlInline(printHtml, 'รายการสั่งซื้อและสรุปจำนวน');
+    }
+
+    function printGroupedOrdersRowsHtml(orders) {
+      const personMap = new Map();
+      (orders || []).forEach(order => {
+        const personKey = normalizeName(order.fullName) || `unknown-${order.orderID || Math.random()}`;
+        if (!personMap.has(personKey)) personMap.set(personKey, { fullName: order.fullName || 'ไม่ระบุชื่อ', total: 0, latestTime: order.timestamp || '', detailMap: new Map() });
+        const person = personMap.get(personKey);
+        const qty = Number(order.quantity || 0);
+        person.total += qty;
+        if (!person.latestTime || new Date(order.timestamp || 0) > new Date(person.latestTime || 0)) person.latestTime = order.timestamp || person.latestTime;
+        const style = order.shirtStyle || '-';
+        const size = order.shirtSize || '-';
+        const detailKey = `${style}__${size}`;
+        if (!person.detailMap.has(detailKey)) person.detailMap.set(detailKey, { shirtStyle: style, shirtSize: size, quantity: 0, latestTime: order.timestamp || '' });
+        const detail = person.detailMap.get(detailKey);
+        detail.quantity += qty;
+        if (!detail.latestTime || new Date(order.timestamp || 0) > new Date(detail.latestTime || 0)) detail.latestTime = order.timestamp || detail.latestTime;
+      });
+      return Array.from(personMap.values())
+        .sort((a, b) => String(a.fullName || '').localeCompare(String(b.fullName || ''), 'th'))
+        .map((person, index) => {
+          const details = Array.from(person.detailMap.values()).sort((a, b) => {
+            const styleCompare = String(a.shirtStyle || '').localeCompare(String(b.shirtStyle || ''), 'th');
+            return styleCompare || String(a.shirtSize || '').localeCompare(String(b.shirtSize || ''), 'th', { numeric: true });
+          });
+          const detailList = details.map((item, detailIndex) => `<span class="detail-line"><span class="detail-index">${detailIndex + 1}</span><span class="detail-main"><strong>${escapeHtml(item.shirtStyle)}</strong> · ไซส์ ${escapeHtml(item.shirtSize)} <span class="detail-time">ล่าสุด ${escapeHtml(formatDate(item.latestTime))}</span></span><span class="qty-pill">${Number(item.quantity || 0).toLocaleString('th-TH')} ตัว</span></span>`).join('');
+          return `<tr><td class="row-number">${index + 1}</td><td><span class="person-name">${escapeHtml(person.fullName)}</span><span class="person-sub">รวม ${Number(person.total || 0).toLocaleString('th-TH')} ตัว</span></td><td><div class="detail-list">${detailList}</div></td><td class="latest-time">${escapeHtml(formatDate(person.latestTime))}</td><td class="person-total">${Number(person.total || 0).toLocaleString('th-TH')} ตัว</td></tr>`;
+        }).join('');
+    }
+
+    function summaryTableHtml(title, dataObj, iconText = '') {
+      const isSizeTable = /ไซส์/.test(title || '');
+      const entries = (isSizeTable ? sortSizeEntries(dataObj || {}) : Object.entries(dataObj || {}).sort((a, b) => String(a[0]).localeCompare(String(b[0]), 'th'))).filter(([, value]) => Number(value || 0) > 0);
+      const total = entries.reduce((sum, [, value]) => sum + Number(value || 0), 0);
+      const icon = iconText ? `<span class="summary-icon">${escapeHtml(iconText)}</span>` : '';
+      const bodyHtml = entries.length
+        ? entries.map(([k, v], index) => `<tr><td><strong>${index + 1}.</strong> ${escapeHtml(k)}</td><td class="text-right nowrap">${Number(v || 0).toLocaleString('th-TH')}</td></tr>`).join('')
+        : '<tr><td colspan="2" class="text-center">ไม่มีข้อมูล</td></tr>';
+      return `<table class="print-table summary-table"><thead><tr><th colspan="2" class="summary-caption">${icon}${escapeHtml(title)}</th></tr><tr><th>รายการ</th><th style="width:24mm">จำนวน</th></tr></thead><tbody>${bodyHtml}</tbody><tfoot><tr><td class="text-right">รวม</td><td class="text-right nowrap">${Number(total || 0).toLocaleString('th-TH')}</td></tr></tfoot></table>`;
+    }
+
+    function fileToDataUrl(file, options = {}) {
+      return new Promise((resolve, reject) => {
+        if (!file || !file.type || !file.type.startsWith('image/')) {
+          reject(new Error('รองรับเฉพาะไฟล์รูปภาพเท่านั้น'));
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          reject(new Error('ไฟล์ภาพต้องมีขนาดไม่เกิน 5 MB'));
+          return;
+        }
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const maxSize = Number(options.maxSize || 1100);
+            const maxLength = Number(options.maxLength || 260000);
+            let { width, height } = img;
+            const ratio = Math.min(1, maxSize / Math.max(width, height));
+            width = Math.max(1, Math.round(width * ratio));
+            height = Math.max(1, Math.round(height * ratio));
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+            let quality = Number(options.qualityStart || .82);
+            const minQuality = Number(options.qualityMin || .46);
+            let dataUrl = canvas.toDataURL('image/jpeg', quality);
+            while (dataUrl.length > maxLength && quality > minQuality) {
+              quality = Math.max(minQuality, quality - .07);
+              dataUrl = canvas.toDataURL('image/jpeg', quality);
+            }
+            if (dataUrl.length > maxLength) {
+              const shrinkRatio = Math.sqrt(maxLength / dataUrl.length) * .92;
+              const smallCanvas = document.createElement('canvas');
+              smallCanvas.width = Math.max(1, Math.round(width * shrinkRatio));
+              smallCanvas.height = Math.max(1, Math.round(height * shrinkRatio));
+              const smallCtx = smallCanvas.getContext('2d');
+              smallCtx.fillStyle = '#ffffff';
+              smallCtx.fillRect(0, 0, smallCanvas.width, smallCanvas.height);
+              smallCtx.drawImage(canvas, 0, 0, smallCanvas.width, smallCanvas.height);
+              dataUrl = smallCanvas.toDataURL('image/jpeg', minQuality);
+            }
+            resolve({ name: file.name.replace(/\.[^.]+$/, '.jpg'), type: 'image/jpeg', size: file.size, dataUrl });
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function readTextFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsText(file, 'UTF-8');
+      });
+    }
+
+    function setButtonLoading(id, loading, text) {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      if (loading) {
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>${text || 'กำลังทำงาน...'}`;
+      } else {
+        btn.disabled = !state.systemOpen && id === 'submitOrderButton';
+        if (btn.dataset.originalHtml) btn.innerHTML = btn.dataset.originalHtml;
+      }
+    }
+
+    function formatDate(value) {
+      if (!value) return '-';
+      const date = value instanceof Date ? value : new Date(value);
+      if (isNaN(date.getTime())) return '-';
+      return date.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+    }
+
+    function toDatetimeLocal(value) {
+      if (!value) return '';
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return value;
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return value;
+      const pad = n => String(n).padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function normalizeName(name) { return String(name || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
+    function escapeHtml(text) { return String(text ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+    function escapeAttr(text) { return escapeHtml(text).replace(/`/g, '&#96;'); }
+  </script>
+</body>
+</html>
