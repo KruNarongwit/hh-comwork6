@@ -708,12 +708,44 @@
     let modelsLoaded = false;
     let modelsLoading = false;
 
+    function releaseBootScreen_() {
+      document.body.classList.remove('app-booting');
+      document.body.classList.add('app-ready');
+    }
+
+    function safeAlert_(title, message, icon = 'error') {
+      const text = message && message.message ? message.message : String(message || 'เกิดข้อผิดพลาด');
+      if (window.Swal && typeof Swal.fire === 'function') {
+        Swal.fire(title, text, icon);
+      } else {
+        alert(`${title}\n${text}`);
+      }
+    }
+
+    const bootFailSafeTimer = setTimeout(() => {
+      if (document.body.classList.contains('app-booting')) {
+        releaseBootScreen_();
+        safeAlert_(
+          'โหลดระบบไม่สำเร็จ',
+          'ระบบใช้เวลานานเกินไป กรุณาตรวจสอบว่า GAS_API_URL เป็นลิงก์ Web App ที่ลงท้าย /exec และ Deploy เป็น Who has access: Anyone',
+          'warning'
+        );
+      }
+    }, 30000);
+
     document.addEventListener('DOMContentLoaded', async () => {
-      document.getElementById('currentYear').textContent = new Date().getFullYear();
-      bindEvents();
-      populateSizeSelect('shirtSize', 'ผู้ชาย');
-      await refreshData();
-      loadShirtModels(false);
+      try {
+        const yearEl = document.getElementById('currentYear');
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+        bindEvents();
+        populateSizeSelect('shirtSize', 'ผู้ชาย');
+        await refreshData();
+        loadShirtModels(false);
+      } catch (error) {
+        clearTimeout(bootFailSafeTimer);
+        releaseBootScreen_();
+        safeAlert_('เกิดข้อผิดพลาดในการเริ่มระบบ', error, 'error');
+      }
     });
 
     function hasGoogleScriptRun_() {
@@ -724,13 +756,86 @@
       return String(GAS_API_URL || '').trim();
     }
 
+    function buildApiUrl_(params) {
+      const apiUrl = getGasApiUrl_();
+      if (!apiUrl || apiUrl.includes('ใส่_WEB_APP_URL')) {
+        throw new Error('ยังไม่ได้ตั้งค่า GAS_API_URL ในไฟล์ index.html กรุณาใส่ลิงก์ Web App จาก Google Apps Script ที่ลงท้ายด้วย /exec');
+      }
+      const query = new URLSearchParams(params);
+      return `${apiUrl}${apiUrl.includes('?') ? '&' : '?'}${query.toString()}`;
+    }
+
     function gasRun(fnName, ...args) {
       if (hasGoogleScriptRun_()) {
         return new Promise((resolve, reject) => {
           google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fnName](...args);
         });
       }
-      return gasApiRunByHiddenFrame_(fnName, args);
+
+      const serializedArgs = JSON.stringify(args || []);
+      if (serializedArgs.length > 6500) {
+        return gasApiRunByHiddenFrame_(fnName, args);
+      }
+
+      return gasApiRunByJsonp_(fnName, args).catch(jsonpError => {
+        console.warn('JSONP API failed, retrying by hidden iframe:', jsonpError);
+        return gasApiRunByHiddenFrame_(fnName, args);
+      });
+    }
+
+    function gasApiRunByJsonp_(action, args = []) {
+      return new Promise((resolve, reject) => {
+        let requestId = `gas_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        requestId = requestId.replace(/[^a-zA-Z0-9_]/g, '_');
+        const callbackName = `__shirtOrderApiCallback_${requestId}`;
+        let script;
+        let finished = false;
+
+        const cleanup = () => {
+          if (finished) return;
+          finished = true;
+          try { delete window[callbackName]; } catch (err) { window[callbackName] = undefined; }
+          if (script && script.parentNode) script.parentNode.removeChild(script);
+        };
+
+        const timer = setTimeout(() => {
+          cleanup();
+          reject(new Error('เชื่อมต่อ Apps Script API ไม่สำเร็จ กรุณาตรวจสอบ GAS_API_URL, การ Deploy และสิทธิ์ Who has access: Anyone'));
+        }, 25000);
+
+        window[callbackName] = payload => {
+          clearTimeout(timer);
+          cleanup();
+          if (payload && payload.ok) {
+            resolve(payload.data);
+          } else {
+            reject(new Error((payload && payload.error) || 'เกิดข้อผิดพลาดจาก Apps Script API'));
+          }
+        };
+
+        try {
+          const src = buildApiUrl_({
+            action,
+            requestId,
+            callback: callbackName,
+            args: JSON.stringify(args || []),
+            _ts: Date.now()
+          });
+          script = document.createElement('script');
+          script.src = src;
+          script.async = true;
+          script.onerror = () => {
+            clearTimeout(timer);
+            cleanup();
+            reject(new Error('โหลด Apps Script API ไม่สำเร็จ กรุณาตรวจสอบ Web App URL หรือสิทธิ์การเข้าถึง'));
+          };
+          document.head.appendChild(script);
+        } catch (error) {
+          clearTimeout(timer);
+          cleanup();
+          reject(error);
+        }
+      });
     }
 
     const gasApiPendingRequests = new Map();
@@ -801,7 +906,7 @@
           form.remove();
           iframe.remove();
           reject(new Error('เชื่อมต่อ Apps Script API ไม่สำเร็จหรือใช้เวลานานเกินไป กรุณาตรวจสอบ Web App URL และสิทธิ์การเข้าถึงเป็น Anyone'));
-        }, 120000);
+        }, 35000);
 
         gasApiPendingRequests.set(requestId, { resolve, reject, timer, form, iframe });
         document.body.appendChild(iframe);
@@ -813,19 +918,19 @@
     async function refreshData() {
       try {
         const result = await gasRun('getInitialData');
-        if (!result.success) throw new Error(result.message);
+        if (!result || !result.success) throw new Error((result && result.message) || 'โหลดข้อมูลเริ่มต้นไม่สำเร็จ');
         const previousModels = state.shirtModels || [];
         state = Object.assign({}, state, result);
         if (!Array.isArray(result.shirtModels) || result.shirtModels.length === 0) {
           state.shirtModels = previousModels;
         }
         renderAll();
-        document.body.classList.remove('app-booting');
-        document.body.classList.add('app-ready');
+        clearTimeout(bootFailSafeTimer);
+        releaseBootScreen_();
       } catch (error) {
-        document.body.classList.remove('app-booting');
-        document.body.classList.add('app-ready');
-        Swal.fire('เกิดข้อผิดพลาด', error.message || String(error), 'error');
+        clearTimeout(bootFailSafeTimer);
+        releaseBootScreen_();
+        safeAlert_('เกิดข้อผิดพลาด', error, 'error');
       }
     }
 
