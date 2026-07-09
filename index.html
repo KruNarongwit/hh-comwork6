@@ -1,3 +1,4 @@
+<!-- GitHub Pages API-ready index.html | เปิดจาก GitHub Pages ได้โดยตรง | ใช้คู่กับ Code_GitHubPages_API_Complete.gs -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -664,6 +665,15 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
+    // ============================================================
+    // ตั้งค่าการเปิดเว็บจาก GitHub Pages
+    // 1) Deploy Apps Script เป็น Web App
+    // 2) ตั้งค่า Execute as: Me และ Who has access: Anyone
+    // 3) นำ Web App URL ที่ลงท้าย /exec มาใส่แทนข้อความด้านล่าง
+    // ตัวอย่าง: https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxx/exec
+    // ============================================================
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyMK-YgKDwzm2PnLwXBuDIh6SExoA32KLTvT3GzwbCU1HmTBd0WC9o7PUfG94wT5U8a_w/exec";
+
     const sizeDetails = {
       'ผู้ชาย': {
         'S': { chest: 36, length: 25 },
@@ -706,9 +716,97 @@
       loadShirtModels(false);
     });
 
+    function hasGoogleScriptRun_() {
+      return typeof google !== 'undefined' && google.script && google.script.run;
+    }
+
+    function getGasApiUrl_() {
+      return String(GAS_API_URL || '').trim();
+    }
+
     function gasRun(fnName, ...args) {
+      if (hasGoogleScriptRun_()) {
+        return new Promise((resolve, reject) => {
+          google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fnName](...args);
+        });
+      }
+      return gasApiRunByHiddenFrame_(fnName, args);
+    }
+
+    const gasApiPendingRequests = new Map();
+
+    window.addEventListener('message', event => {
+      const data = event.data || {};
+      if (!data || data.type !== 'GAS_API_RESPONSE' || !data.requestId) return;
+      const pending = gasApiPendingRequests.get(data.requestId);
+      if (!pending) return;
+      clearTimeout(pending.timer);
+      gasApiPendingRequests.delete(data.requestId);
+      setTimeout(() => {
+        pending.form?.remove();
+        pending.iframe?.remove();
+      }, 120);
+      if (data.ok) {
+        pending.resolve(data.data);
+      } else {
+        pending.reject(new Error(data.error || 'เกิดข้อผิดพลาดในการเชื่อมต่อ Apps Script API'));
+      }
+    });
+
+    function gasApiRunByHiddenFrame_(action, args = []) {
       return new Promise((resolve, reject) => {
-        google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fnName](...args);
+        const apiUrl = getGasApiUrl_();
+        if (!apiUrl || apiUrl.includes('ใส่_WEB_APP_URL')) {
+          reject(new Error('ยังไม่ได้ตั้งค่า GAS_API_URL ในไฟล์ index.html กรุณาใส่ลิงก์ Web App จาก Google Apps Script ที่ลงท้ายด้วย /exec'));
+          return;
+        }
+
+        const requestId = `gas_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const frameName = `gasApiFrame_${requestId}`;
+
+        const iframe = document.createElement('iframe');
+        iframe.name = frameName;
+        iframe.title = 'GAS API Bridge';
+        iframe.style.position = 'fixed';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '-9999px';
+        iframe.style.width = '1px';
+        iframe.style.height = '1px';
+        iframe.style.opacity = '0';
+        iframe.style.border = '0';
+        iframe.setAttribute('aria-hidden', 'true');
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = apiUrl;
+        form.target = frameName;
+        form.acceptCharset = 'UTF-8';
+        form.style.display = 'none';
+
+        const addField = (name, value) => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = name;
+          input.value = value == null ? '' : String(value);
+          form.appendChild(input);
+        };
+
+        addField('action', action);
+        addField('requestId', requestId);
+        addField('args', JSON.stringify(args || []));
+        addField('_ts', Date.now());
+
+        const timer = setTimeout(() => {
+          gasApiPendingRequests.delete(requestId);
+          form.remove();
+          iframe.remove();
+          reject(new Error('เชื่อมต่อ Apps Script API ไม่สำเร็จหรือใช้เวลานานเกินไป กรุณาตรวจสอบ Web App URL และสิทธิ์การเข้าถึงเป็น Anyone'));
+        }, 120000);
+
+        gasApiPendingRequests.set(requestId, { resolve, reject, timer, form, iframe });
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+        form.submit();
       });
     }
 
